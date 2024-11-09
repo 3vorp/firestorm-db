@@ -1,10 +1,10 @@
 <?php
 
 require_once './utils.php';
-require_once './classes/JSONDatabase.php';
+require_once './classes/Collection.php';
 
 $log_path = 'firestorm.log';
-$database_list = array();
+$database_list = [];
 
 /**
  * Example server-side collection creation:
@@ -12,7 +12,7 @@ $database_list = array();
  * For adding multiple collections, you can declare them directly in the array constructor.
  */
 
-$db = new JSONDatabase;
+$db = new Collection;
 // This will be the name of the JSON file
 // It has to be the same as the actual file name (no extension)
 $db->fileName = 'my_json_name';
@@ -29,7 +29,7 @@ $database_list['my_collection_name'] = $db;
 // This can be simplified into the following constructor:
 // - Note: all of these arguments are optional and will fall back to their defaults if not provided
 // - Order: (fileName, autoKey, autoIncrement)
-$database_list['my_collection_name'] = new JSONDatabase('my_json_name', true, true);
+$database_list['my_collection_name'] = new Collection('my_json_name', true, true);
 
 /**
  * File handling:
@@ -37,7 +37,7 @@ $database_list['my_collection_name'] = new JSONDatabase('my_json_name', true, tr
  */
 
 // Extension whitelist
-$authorized_file_extension = array('.txt', '.png', '.jpg', '.jpeg');
+$authorized_file_extension = ['.txt', '.png', '.jpg', '.jpeg'];
 
 // Root directory for where files should be uploaded
 // ($_SERVER['SCRIPT_FILENAME']) is a shortcut to the root Firestorm directory.

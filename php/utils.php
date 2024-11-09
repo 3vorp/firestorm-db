@@ -1,16 +1,16 @@
 <?php
 
-function pre_dump($val) {
+function pre_dump($val): void {
     echo '<pre>';
     var_dump($val);
     echo '</pre>';
 }
 
-function check($var) {
+function check($var): bool {
     return isset($var) and !empty($var);
 }
 
-function sec($var) {
+function sec($var): string {
     return htmlspecialchars($var);
 }
 
@@ -23,38 +23,38 @@ function http_response($body, $code = 200) {
 }
 
 function http_json_response($json, $code = 200) {
-    http_response(json_encode($json), $code);
+    return http_response(json_encode($json), $code);
 }
 
 function http_message($message, $key = 'message', $code = 200) {
-    $arr = array($key => $message);
-    http_json_response($arr, $code);
+    $arr = [$key => $message];
+    return http_json_response($arr, $code);
 }
 
 function http_error($code, $message) {
-    http_message($message, 'error', $code);
+    return http_message($message, 'error', $code);
 }
 
-function is_primitive($value) {
+function http_success($message) {
+    return http_message($message, 'message', 200);
+}
+
+function is_primitive($value): bool {
     $value_type = gettype($value);
-    return $value_type == 'NULL' ||
-        $value_type == 'boolean' ||
-        $value_type == 'integer' ||
-        $value_type == 'double' ||
-        $value_type == 'string';
+    return $value_type === 'NULL' ||
+        $value_type === 'boolean' ||
+        $value_type === 'integer' ||
+        $value_type === 'double' ||
+        $value_type === 'string';
 }
 
-function is_number_like($value) {
+function is_number_like($value): bool {
     $value_type = gettype($value);
     return in_array($value_type, ['integer', 'double']);
 }
 
-function is_keyable($value) {
+function is_keyable($value): bool {
     return in_array(gettype($value), ['integer', 'string']);
-}
-
-function http_success($message) {
-    http_message($message, 'message', 200);
 }
 
 function check_key_json($key, $arr, $parse = false) {
@@ -63,12 +63,12 @@ function check_key_json($key, $arr, $parse = false) {
     return false;
 }
 
-function array_assoc($arr) {
-    if (array() === $arr || !is_array($arr)) return false;
+function array_assoc($arr): bool {
+    if ([] === $arr || !is_array($arr)) return false;
     return array_keys($arr) !== range(0, count($arr) - 1);
 }
 
-function array_sequential($arr) {
+function array_sequential($arr): bool {
     return !array_assoc($arr);
 }
 
@@ -77,7 +77,7 @@ function stringifier($obj, $depth = 1) {
 
     $res = "{";
 
-    $formed = array();
+    $formed = [];
     foreach (array_keys($obj) as $key) {
         array_push($formed, '"' . strval($key) . '":' . stringifier($obj[$key], $depth - 1));
     }
@@ -109,11 +109,11 @@ function cors() {
     }
 }
 
-function remove_dots($path) {
+function remove_dots($path): string {
     $root = ($path[0] === '/') ? '/' : '';
 
     $segments = explode('/', trim($path, '/'));
-    $ret = array();
+    $ret = [];
     foreach ($segments as $segment) {
         if ($segment == '.' || strlen($segment) === 0) continue;
         if ($segment == '..') array_pop($ret);

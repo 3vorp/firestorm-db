@@ -39,7 +39,7 @@ if (!array_key_exists($collection, $database_list))
     http_error(404, "Collection not found: $collection");
 
 /**
- * @var JSONDatabase
+ * @var Collection
  */
 $db = $database_list[$collection];
 
@@ -67,9 +67,8 @@ switch ($command) {
         http_response($res);
         break;
     case 'read_raw':
-        $res = $db->read_raw();
-        $res = $res['content'];
-        http_response($res);
+        $res = $db->readRaw();
+        http_response($res->content);
         break;
     case 'get':
         $id = check_key_json('id', $inputJSON);

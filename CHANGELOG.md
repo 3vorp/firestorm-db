@@ -5,7 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# [1.13.0] - 2024-05-09
+## [Unreleased]
+
+### Changed
+
+- Split JSONDatabase into two classes; one with I/O tracking and a new Collection class with Firestorm-specific methods.
+- Moved some very verbose functionality (e.g. field editing, searching) to separate files to reduce the sheer size of the main Collection file.
+- Replaced the associative array being used as a file wrapper with a properly typed class.
+- Added types and doc comments throughout the PHP wrapper.
+- Modernized codebase to use better practices (e.g. [] over array(), properly annotated return types, etc)
+
+### Fixed
+
+- SHA-1 being misspelled as sha1 in a few places.
+
+## [1.13.0] - 2024-05-09
 
 ### Added
 

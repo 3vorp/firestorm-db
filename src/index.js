@@ -29,7 +29,7 @@ try {
 
 /**
  * @typedef {Object} SelectOption
- * @property {Array<string>} fields - Selected fields to be returned
+ * @property {string[]} fields - Selected fields to be returned
  */
 
 /**
@@ -205,9 +205,9 @@ class Collection {
 	}
 
 	/**
-	 * Get the sha1 hash of the JSON
+	 * Get the SHA-1 hash of the JSON
 	 * - Can be used to compare file content without downloading the file
-	 * @returns {string} The sha1 hash of the file
+	 * @returns {string} The SHA-1 hash of the file
 	 */
 	sha1() {
 		// string value is correct so we don't need validation

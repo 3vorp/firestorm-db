@@ -76,8 +76,8 @@ johnDoe.hello(); // "John Doe says hello!"
 
 | Name                      | Parameters                                                  | Description                                                                                            |
 | ------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| sha1()                    | none                                                        | Get the sha1 hash of the file. Can be used to compare file content without downloading the JSON.       |
-| readRaw(original)         | original?: `boolean`                                        | Read the entire collection. `original` disables ID field injection, for non-relational collections.    |
+| sha1()                    | none                                                        | Get the SHA-1 hash of the file. Can be used to compare file content without downloading the JSON.      |
+| readRaw(original)         | original?: `boolean`                                        | Read the entire collection. `original` disables ID field injection for non-relational collections.     |
 | get(key)                  | key: `string \| number`                                     | Get an element from the collection by its key.                                                         |
 | searchKeys(keys)          | keys: `string[] \| number[]`                                | Get multiple elements from the collection by their keys.                                               |
 | search(options, random)   | options: `SearchOption[]` random?:`boolean \| number`       | Search through the collection. You can randomize the output order with random as true or a given seed. |
@@ -154,17 +154,17 @@ Firestorm's PHP files handle files, read, and writes, through `GET` and `POST` r
 The server-side files to handle requests can be found and copied to your hosting platform [here](./php/). The two files that need editing are `tokens.php` and `config.php`.
 
 - `tokens.php` contains writing tokens declared in a `$db_tokens` array. These correspond to the tokens used with `firestorm.token()` in the JavaScript client.
-- `config.php` stores all of your collections. This file needs to declare a `$database_list` associative array of `JSONDatabase` instances.
+- `config.php` stores all of your collections. This file needs to declare a `$database_list` associative array of `Collection` instances.
 
 ```php
 <?php
 // config.php
-require_once './classes/JSONDatabase.php';
+require_once './classes/Collection.php';
 
-$database_list = array();
+$database_list = [];
 
 // without constructor
-$tmp = new JSONDatabase;
+$tmp = new Collection;
 $tmp->folderPath = './files/';
 $tmp->fileName = 'orders';
 $tmp->autoKey = true;
@@ -173,13 +173,13 @@ $tmp->autoIncrement = false;
 $database_list[$tmp->fileName] = $tmp;
 
 // with constructor ($fileName, $autoKey = true, $autoIncrement = true)
-$tmp = new JSONDatabase('users', false);
+$tmp = new Collection('users', false);
 $tmp->folderPath = './files/';
 
 $database_list[$tmp->fileName] = $tmp;
 ```
 
-- The database will be stored in `<folderPath>/<filename>.json` (default folder: `./files/`).
+- The database will be stored in `<folderPath>/<fileName>.json` (default folder: `./files/`).
 - `autoKey` controls whether to automatically generate the key name or to have explicit key names (default: `true`).
 - `autoIncrement` controls whether to simply start generating key names from zero or to use a [random ID](https://www.php.net/manual/en/function.uniqid.php) each time (default: `true`).
 - The key in the `$database_list` array is what the collection should be referred to in the JavaScript collection constructor. This can be different from the JSON filename if needed.
@@ -189,11 +189,11 @@ If you're working with multiple collections, it's probably easier to initialize 
 ```php
 // config.php
 <?php
-require_once './classes/JSONDatabase.php';
-$database_list = array(
-    'orders' => new JSONDatabase('orders', true),
-    'users' => new JSONDatabase('users', false),
-)
+require_once './classes/Collection.php';
+$database_list = [
+    'orders' => new Collection('orders', true),
+    'users' => new Collection('users', false),
+]
 ```
 
 ## Permissions
@@ -212,7 +212,7 @@ To work with files server-side, you need two new configuration variables in `con
 
 ```php
 // Extension whitelist
-$authorized_file_extension = array('.txt', '.png', '.jpg', '.jpeg');
+$authorized_file_extension = ['.txt', '.png', '.jpg', '.jpeg'];
 
 // Root directory for where files should be uploaded
 // ($_SERVER['SCRIPT_FILENAME']) is a shortcut to the root Firestorm directory.
@@ -377,7 +377,7 @@ You may have noticed two different methods that seem to do the same thing: `add`
 For instance, the following PHP configuration will disable add operations:
 
 ```php
-$database_list['users'] = new JSONDatabase('users', false);
+$database_list['users'] = new Collection('users', false);
 ```
 
 ```js
@@ -441,7 +441,7 @@ The first keys in a Firestorm request will always be the same regardless of its 
 }
 ```
 
-PHP grabs the `JSONDatabase` instance created in `config.php` using the `collection` key in the request as the `$database_list` key name. From there, the `token` is used to validate the request if needed and the `command` is found and executed.
+PHP grabs the `Collection` instance created in `config.php` using the `collection` key in the request as the `$database_list` key name. From there, the `token` is used to validate the request if needed and the `command` is found and executed.
 
 ## Memory management
 

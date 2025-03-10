@@ -40,10 +40,8 @@ export type BooleanCriteria =
 export type AnyCriteria = StringCriteria | ArrayCriteria | BooleanCriteria | NumberCriteria;
 
 export type Criteria<T> = T extends Function
-	? never
-	:
-				| never /** Methods are not allowed in the field (they are not saved in the collection JSON file) */
-				| T extends Array<unknown>
+	? never /** Methods are not allowed in the field (they are not saved in the collection JSON file) */
+	: T extends Array<unknown>
 		? ArrayCriteria
 		: never | T extends string
 			? StringCriteria
@@ -108,7 +106,7 @@ export type EditFieldOption<T> = {
 			| {
 					field: Field<number, T>;
 					operation: "increment" | "decrement";
-					value?: Number;
+					value?: number;
 			  }
 			| {
 					field: Field<T[K], T> | string;

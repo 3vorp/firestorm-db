@@ -138,7 +138,7 @@ Edit objects have an `id` of the element, a `field` to edit, an `operation` with
 | `append`       | Yes         | `string`                 | Appends a string to the end of a string field.                                                                                         |
 | `invert`       | No          | *N/A*                    | Inverts the state of a boolean field.                                                                                                  |
 | `increment`    | No          | `number`                 | Adds a number to the field (default: 1).                                                                                               |
-| `decrement`    | No          | `number`                 | Removes a number from the field (default: 1).                                                                                          |
+| `decrement`    | No          | `number`                 | Subtracts a number from the field (default: 1).                                                                                        |
 | `array-push `  | Yes         | `any`                    | Pushes an element to the end of an array field.                                                                                        |
 | `array-delete` | Yes         | `number`                 | Removes an array element by index.                                                                                                     |
 | `array-splice` | Yes         | `[number, number, any?]` | Last argument is optional. Check the PHP [array_splice](https://www.php.net/manual/function.array-splice) documentation for more info. |

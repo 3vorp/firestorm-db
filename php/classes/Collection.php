@@ -171,7 +171,7 @@ class Collection extends JSONDatabase {
      * @return array The found elements
      */
     public function random($params): array {
-        return random($params, $this);
+        return random($this, $params);
     }
 
 

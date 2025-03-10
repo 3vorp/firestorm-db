@@ -10,7 +10,7 @@ function make_seed() {
 // can run with a maximum amount of random entries
 // (if collection is smaller it's not guaranteed)
 // (is optional, else it will be all the results)
-function random($params, Collection $class) {
+function random(Collection $class, $params): array {
     $hasMax = array_key_exists('max', $params);
     $max = $hasMax ? $params['max'] : -1;
     if ($hasMax && (gettype($max) !== 'integer' || $max < -1))
@@ -38,7 +38,7 @@ function random($params, Collection $class) {
     return choose_random($obj->json, $seed, $max, $offset);
 }
 
-function choose_random($json, $seed = false, $max = -1, $offset = 0) {
+function choose_random($json, $seed = false, $max = -1, $offset = 0): array {
     $keys = array_keys($json);
     $keys_selected = [];
     $keys_length = count($keys);

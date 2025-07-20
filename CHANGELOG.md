@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Changed PHP file representation from an associative array to a strongly-typed FileObject class.
 
+### Fixed
+
+- Fixed `ID_FIELD` TypeScript type.
+
 ## [1.13.0] - 2024-05-09
 
 ### Added

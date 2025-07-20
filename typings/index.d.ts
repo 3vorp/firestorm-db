@@ -348,7 +348,7 @@ declare class Collection<T> {
 }
 
 /** Value for the ID field when searching content */
-export const ID_FIELD: string;
+export const ID_FIELD: "id";
 
 /**
  * Change or get the current Firestorm address

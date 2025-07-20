@@ -365,6 +365,8 @@ class JSONDatabase {
                         return !array_contains_any($field, $value, $ignoreCase);
                     case 'array-contains-any':
                         return array_contains_any($field, $value, $ignoreCase);
+                    case 'array-contains-all':
+                        return array_contains_all($field, $value, $ignoreCase);
                     case 'array-length':
                     case 'array-length-eq':
                         return count($field) == $value;

@@ -18,7 +18,7 @@ export type StringCriteria =
 	| ">=" /** String value length is greater than or equal to the provided value */
 	| "in" /** String value is in the given array */
 	| "includes" /** String value includes the provided value */
-	| "contains" /** Same as "includes" */
+	| "contains" /** Alias of "includes" */
 	| "startsWith" /** String value starts with the provided value */
 	| "endsWith"; /** String value ends with the provided value */
 
@@ -26,6 +26,7 @@ export type ArrayCriteria =
 	| "array-contains" /** Value is in the given array */
 	| "array-contains-none" /** No value of the array is in the given array */
 	| "array-contains-any" /** Any value of the array is in the given array */
+	| "array-contains-all" /** Every value of the array is in the given array */
 	| "array-length-eq" /** Array length is equal to the provided value */
 	| "array-length-df" /** Array length is different from the provided value */
 	| "array-length-gt" /** Array length is greater than the provided value */

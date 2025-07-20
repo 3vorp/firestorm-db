@@ -106,6 +106,7 @@ The search method can take one or more options to filter entries in a collection
 | `'array-contains'`      | `Array`                       | Entry field's array contains your value                         |
 | `'array-contains-none'` | `Array`                       | Entry field's array contains no values from your array          |
 | `'array-contains-any'`  | `Array`                       | Entry field's array contains at least one value from your array |
+| `'array-contains-all'`  | `Array`                       | Entry field's array contains every value from your array        |
 | `'array-length-eq'`     | `number`                      | Entry field's array size is equal to your value                 |
 | `'array-length-df'`     | `number`                      | Entry field's array size is different from your value           |
 | `'array-length-lt'`     | `number`                      | Entry field's array size is lower than your value               |

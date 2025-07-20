@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- `array-contains-all` option for array fields.
+
 ### Changed
 
 - Changed PHP file representation from an associative array to a strongly-typed FileObject class.

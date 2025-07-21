@@ -224,9 +224,8 @@ class Collection {
 		const res = await this.__get_request("get", {
 			id: key,
 		});
-		const firstKey = Object.keys(res)[0];
-		res[firstKey][ID_FIELD_NAME] = firstKey;
-		res = res[firstKey];
+		// String is more portable than .toString()
+		res[ID_FIELD_NAME] = String(key);
 		return this.__add_methods(res, false);
 	}
 

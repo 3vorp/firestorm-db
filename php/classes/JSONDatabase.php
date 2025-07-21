@@ -107,9 +107,7 @@ class JSONDatabase {
             array_key_exists(strval($key), $obj->content) == false
         )
             return null;
-
-        $res = [$key => $obj->content[$key]];
-        return $res;
+        return $obj->content[$key];
     }
 
     public function set($key, $value) {

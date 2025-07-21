@@ -209,10 +209,7 @@ describe("GET operations", () => {
 					])
 					.then((res) => {
 						expect(res).to.be.an("array", "Search result must be an array");
-						expect(res).to.have.lengthOf(
-							idsFound.length,
-							"Found result has incorrect length",
-						);
+						expect(res).to.have.lengthOf(idsFound.length, "Found result has incorrect length");
 						expect(res.map((el) => el[firestorm.ID_FIELD])).to.deep.equal(
 							idsFound,
 							"Incorrect result search",

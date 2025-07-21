@@ -76,12 +76,11 @@ const writeToken = () => {
  * @ignore
  * @param {AxiosPromise} request - Axios request promise
  */
-const __extract_data = (request) => {
-	if (!(request instanceof Promise)) request = Promise.resolve(request);
-	return request.then((res) => {
-		if ("data" in res) return res.data;
-		return res;
-	});
+const __extract_data = async (request) => {
+	// does nothing if request is synchronous
+	const res = await request;
+	if ("data" in res) return res.data;
+	return res;
 };
 
 /**
@@ -89,6 +88,9 @@ const __extract_data = (request) => {
  * @template T
  */
 class Collection {
+	/** Name of the Firestorm collection */
+	collectionName;
+
 	/**
 	 * Create a new Firestorm collection instance
 	 * @param {string} name - The name of the collection
@@ -145,7 +147,7 @@ class Collection {
 	 * @param {boolean} [objectLike] - Reject if an object or array isn't being returned
 	 * @returns {Promise<any>} Extracted response
 	 */
-	__get_request(command, data = {}, objectLike = true) {
+	async __get_request(command, data = {}, objectLike = true) {
 		const obj = {
 			collection: this.collectionName,
 			command: command,
@@ -154,11 +156,10 @@ class Collection {
 		const request = IS_NODE
 			? axios.get(readAddress(), { data: obj })
 			: axios.post(readAddress(), obj);
-		return this.__extract_data(request).then((res) => {
-			// reject php error strings if enforcing return type
-			if (objectLike && typeof res !== "object") return Promise.reject(res);
-			return res;
-		});
+		const res = await this.__extract_data(request);
+		// reject php error strings if enforcing return type
+		if (objectLike && typeof res !== "object") throw res;
+		return res;
 	}
 
 	/**
@@ -219,15 +220,14 @@ class Collection {
 	 * @param {string | number} key - Key to search
 	 * @returns {Promise<T>} The found element
 	 */
-	get(key) {
-		return this.__get_request("get", {
+	async get(key) {
+		const res = await this.__get_request("get", {
 			id: key,
-		}).then((res) => {
-			const firstKey = Object.keys(res)[0];
-			res[firstKey][ID_FIELD_NAME] = firstKey;
-			res = res[firstKey];
-			return this.__add_methods(res, false);
 		});
+		const firstKey = Object.keys(res)[0];
+		res[firstKey][ID_FIELD_NAME] = firstKey;
+		res = res[firstKey];
+		return this.__add_methods(res, false);
 	}
 
 	/**
@@ -235,19 +235,17 @@ class Collection {
 	 * @param {string[] | number[]} keys - Array of keys to search
 	 * @returns {Promise<T[]>} The found elements
 	 */
-	searchKeys(keys) {
-		if (!Array.isArray(keys)) return Promise.reject(new TypeError("Incorrect keys"));
+	async searchKeys(keys) {
+		if (!Array.isArray(keys)) throw new TypeError("Incorrect keys");
 
-		return this.__get_request("searchKeys", {
+		const res = await this.__get_request("searchKeys", {
 			search: keys,
-		}).then((res) => {
-			const arr = Object.entries(res).map(([id, value]) => {
-				value[ID_FIELD_NAME] = id;
-				return value;
-			});
-
-			return this.__add_methods(arr);
 		});
+		const arr = Object.entries(res).map(([id, value]) => {
+			value[ID_FIELD_NAME] = id;
+			return value;
+		});
+		return this.__add_methods(arr);
 	}
 
 	/**
@@ -256,21 +254,18 @@ class Collection {
 	 * @param {boolean | number} [random] - Random result seed, disabled by default, but can activated with true or a given seed
 	 * @returns {Promise<T[]>} The found elements
 	 */
-	search(options, random = false) {
-		if (!Array.isArray(options))
-			return Promise.reject(new TypeError("searchOptions shall be an array"));
+	async search(options, random = false) {
+		if (!Array.isArray(options)) throw new TypeError("searchOptions shall be an array");
 
 		options.forEach((option) => {
 			if (option.field === undefined || option.criteria === undefined || option.value === undefined)
-				return Promise.reject(new TypeError("Missing fields in searchOptions array"));
+				throw new TypeError("Missing fields in searchOptions array");
 
 			if (typeof option.field !== "string")
-				return Promise.reject(
-					new TypeError(`${JSON.stringify(option)} search option field is not a string`),
-				);
+				throw new TypeError(`${JSON.stringify(option)} search option field is not a string`);
 
 			if (option.criteria == "in" && !Array.isArray(option.value))
-				return Promise.reject(new TypeError("in takes an array of values"));
+				throw new TypeError("in takes an array of values");
 
 			// TODO: add more strict value field warnings in JS and PHP
 		});
@@ -285,21 +280,18 @@ class Collection {
 			} else {
 				const seed = parseInt(random);
 				if (isNaN(seed))
-					return Promise.reject(
-						new TypeError("random takes as parameter true, false or an integer value"),
-					);
+					throw new TypeError("random takes as parameter true, false or an integer value");
+
 				params.random = { seed };
 			}
 		}
 
-		return this.__get_request("search", params).then((res) => {
-			const arr = Object.entries(res).map(([id, value]) => {
-				value[ID_FIELD_NAME] = id;
-				return value;
-			});
-
-			return this.__add_methods(arr);
+		const res = await this.__get_request("search", params);
+		const arr = Object.entries(res).map(([id, value]) => {
+			value[ID_FIELD_NAME] = id;
+			return value;
 		});
+		return this.__add_methods(arr);
 	}
 
 	/**
@@ -307,17 +299,14 @@ class Collection {
 	 * @param {boolean} [original] - Disable ID field injection for easier iteration (default false)
 	 * @returns {Promise<Record<string, T>>} The entire collection
 	 */
-	readRaw(original = false) {
-		return this.__get_request("read_raw").then((data) => {
-			if (original) return this.__add_methods(data);
-
-			// preserve as object
-			Object.keys(data).forEach((key) => {
-				data[key][ID_FIELD_NAME] = key;
-			});
-
-			return this.__add_methods(data);
+	async readRaw(original = false) {
+		const data = await this.__get_request("read_raw");
+		if (original) return this.__add_methods(data);
+		// preserve as object
+		Object.keys(data).forEach((key) => {
+			data[key][ID_FIELD_NAME] = key;
 		});
+		return this.__add_methods(data);
 	}
 
 	/**
@@ -336,16 +325,15 @@ class Collection {
 	 * @param {SelectOption} option - The fields you want to select
 	 * @returns {Promise<Record<string, Partial<T>>>} Selected fields
 	 */
-	select(option) {
+	async select(option) {
 		if (!option) option = {};
-		return this.__get_request("select", {
+		const data = await this.__get_request("select", {
 			select: option,
-		}).then((data) => {
-			Object.keys(data).forEach((key) => {
-				data[key][ID_FIELD_NAME] = key;
-			});
-			return this.__add_methods(data);
 		});
+		Object.keys(data).forEach((key) => {
+			data[key][ID_FIELD_NAME] = key;
+		});
+		return this.__add_methods(data);
 	}
 
 	/**
@@ -353,19 +341,17 @@ class Collection {
 	 * @param {ValueOption} option - Value options
 	 * @returns {Promise<T[]>} Array of unique values
 	 */
-	values(option) {
-		if (!option) return Promise.reject(new TypeError("Value option must be provided"));
-		if (typeof option.field !== "string")
-			return Promise.reject(new TypeError("Field must be a string"));
+	async values(option) {
+		if (!option) throw new TypeError("Value option must be provided");
+		if (typeof option.field !== "string") throw new TypeError("Field must be a string");
 		if (option.flatten !== undefined && typeof option.flatten !== "boolean")
-			return Promise.reject(new TypeError("Flatten must be a boolean"));
+			throw new TypeError("Flatten must be a boolean");
 
-		return this.__get_request("values", {
+		const data = await this.__get_request("values", {
 			values: option,
-		}).then((data) =>
-			// no ID_FIELD or method injection since no ids are returned
-			Object.values(data).filter((d) => d !== null),
-		);
+		});
+		// no ID_FIELD or method injection since no ids are returned
+		return Object.values(data).filter((d) => d !== null);
 	}
 
 	/**
@@ -375,40 +361,37 @@ class Collection {
 	 * @param {number} [offset] - The offset to use
 	 * @returns {Promise<T[]>} The found elements
 	 */
-	random(max, seed, offset) {
+	async random(max, seed, offset) {
 		const params = {};
 		if (max !== undefined) {
 			if (typeof max !== "number" || !Number.isInteger(max) || max < -1)
-				return Promise.reject(new TypeError("Expected integer >= -1 for the max"));
+				throw new TypeError("Expected integer >= -1 for the max");
 			params.max = max;
 		}
 
 		const hasSeed = seed !== undefined;
 		const hasOffset = offset !== undefined;
-		if (hasOffset && !hasSeed)
-			return Promise.reject(new TypeError("You can't put an offset without a seed"));
+		if (hasOffset && !hasSeed) throw new TypeError("You can't put an offset without a seed");
 
 		if (hasOffset && (typeof offset !== "number" || !Number.isInteger(offset) || offset < 0))
-			return Promise.reject(new TypeError("Expected integer >= -1 for the max"));
+			throw new TypeError("Expected integer >= -1 for the max");
 
 		if (hasSeed) {
 			if (typeof seed !== "number" || !Number.isInteger(seed))
-				return Promise.reject(new TypeError("Expected integer for the seed"));
+				throw new TypeError("Expected integer for the seed");
 
 			if (!hasOffset) offset = 0;
 			params.seed = seed;
 			params.offset = offset;
 		}
 
-		return this.__get_request("random", {
+		const data = await this.__get_request("random", {
 			random: params,
-		}).then((data) => {
-			Object.keys(data).forEach((key) => {
-				data[key][ID_FIELD_NAME] = key;
-			});
-
-			return this.__add_methods(data);
 		});
+		Object.keys(data).forEach((key) => {
+			data[key][ID_FIELD_NAME] = key;
+		});
+		return this.__add_methods(data);
 	}
 
 	/**
@@ -417,9 +400,9 @@ class Collection {
 	 * @param {Record<string, T>} value - The value to write
 	 * @returns {Promise<WriteConfirmation>} Write confirmation
 	 */
-	writeRaw(value) {
+	async writeRaw(value) {
 		if (value === undefined || value === null)
-			return Promise.reject(new TypeError("writeRaw value must not be undefined or null"));
+			throw new TypeError("writeRaw value must not be undefined or null");
 		return this.__extract_data(axios.post(writeAddress(), this.__write_data("write_raw", value)));
 	}
 
@@ -440,15 +423,12 @@ class Collection {
 	 * @param {T} value - The value (without methods) to add
 	 * @returns {Promise<string>} The generated key of the added element
 	 */
-	add(value) {
-		return axios
-			.post(writeAddress(), this.__write_data("add", value))
-			.then((res) => this.__extract_data(res))
-			.then((res) => {
-				if (typeof res != "object" || !("id" in res) || typeof res.id != "string")
-					return Promise.reject(res);
-				return res.id;
-			});
+	async add(value) {
+		const res = await this.__extract_data(
+			axios.post(writeAddress(), this.__write_data("add", value)),
+		);
+		if (typeof res !== "object" || !("id" in res) || typeof res.id !== "string") throw res;
+		return res.id;
 	}
 
 	/**
@@ -457,10 +437,11 @@ class Collection {
 	 * @param {T[]} values - The values (without methods) to add
 	 * @returns {Promise<string[]>} The generated keys of the added elements
 	 */
-	addBulk(values) {
-		return this.__extract_data(
+	async addBulk(values) {
+		const res = await this.__extract_data(
 			axios.post(writeAddress(), this.__write_data("addBulk", values, true)),
-		).then((res) => res.ids);
+		);
+		return res.ids;
 	}
 
 	/**

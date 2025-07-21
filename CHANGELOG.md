@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Changed PHP file representation from an associative array to a strongly-typed FileObject class.
+- Use modern async/await (supported in all major browers/Node.js since 2017).
 
 ### Fixed
 

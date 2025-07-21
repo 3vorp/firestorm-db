@@ -85,7 +85,7 @@ const __extract_data = async (request) => {
 
 /**
  * Represents a Firestorm Collection
- * @template T
+ * @template T - Type of collection element
  */
 class Collection {
 	/** Name of the Firestorm collection */
@@ -570,8 +570,9 @@ const firestorm = {
 		/**
 		 * Get a file by its path
 		 * @memberof firestorm.files
+		 * @template T - Type of file content
 		 * @param {string} path - The wanted file path
-		 * @returns {Promise<any>} File contents
+		 * @returns {Promise<T>} File contents
 		 */
 		get(path) {
 			return __extract_data(

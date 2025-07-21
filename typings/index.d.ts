@@ -182,7 +182,7 @@ export type Settable<T> = Addable<T> & {
 
 /**
  * Represents a Firestorm Collection
- * @template T Type of collection element
+ * @template T - Type of collection element
  */
 declare class Collection<T> {
 	/** Name of the Firestorm collection */
@@ -387,10 +387,11 @@ export function table<T>(table: string): Collection<T>;
 export declare const files: {
 	/**
 	 * Get a file by its path
+	 * @template T - Type of file content
 	 * @param path - The wanted file path
 	 * @returns File contents
 	 */
-	get(path: string): Promise<any>;
+	get<T>(path: string): Promise<T>;
 
 	/**
 	 * Upload a file

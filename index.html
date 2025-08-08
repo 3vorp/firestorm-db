@@ -525,59 +525,6 @@ deletePromise
     .then(() => console.log(&quot;File successfully deleted&quot;))
     .catch((err) => console.error(err));
 </code></pre>
-<h1>TypeScript Support</h1>
-<p>Firestorm ships with TypeScript support out of the box.</p>
-<h2>Collection types</h2>
-<p>Collections in TypeScript take a generic parameter <code>T</code>, which is the type of each element in the collection. If you aren't using a relational collection, this can simply be set to <code>any</code>.</p>
-<pre class="prettyprint source lang-ts"><code>import firestorm from &quot;firestorm-db&quot;;
-firestorm.address(&quot;ADDRESS_VALUE&quot;);
-
-interface User {
-    name: string;
-    password: string;
-    pets: string[];
-}
-
-const userCollection = firestorm.collection&lt;User>(&quot;users&quot;);
-
-const johnDoe = await userCollection.get(123456789);
-// type: { name: string, password: string, pets: string[] }
-</code></pre>
-<p>Injected methods should also be stored in this interface. They'll get filtered out from write operations to prevent false positives:</p>
-<pre class="prettyprint source lang-ts"><code>import firestorm from &quot;firestorm-db&quot;;
-firestorm.address(&quot;ADDRESS_VALUE&quot;);
-
-interface User {
-    name: string;
-    hello(): string;
-}
-
-const userCollection = firestorm.collection(&quot;users&quot;, (el) => {
-    // interface types should agree with injected methods
-    el.hello = () => `${el.name} says hello!`;
-    return el;
-});
-
-const johnDoe = await userCollection.get(123456789);
-const hello = johnDoe.hello(); // type: string
-
-await userCollection.add({
-    name: &quot;Mary Doe&quot;,
-    // error: 'hello' does not exist in type 'Addable&lt;User>'.
-    hello() {
-        return &quot;Mary Doe says hello!&quot;
-    }
-})
-</code></pre>
-<h2>Additional types</h2>
-<p>Additional types exist for search criteria options, write method return types, configuration methods, the file handler, etc.</p>
-<pre class="prettyprint source lang-ts"><code>import firestorm from &quot;firestorm-db&quot;;
-const address = firestorm.address(&quot;ADDRESS_VALUE&quot;);
-// type: string
-
-const deleteConfirmation = await firestorm.files.delete(&quot;/quote.txt&quot;);
-// type: firestorm.WriteConfirmation
-</code></pre>
 <h1>Advanced Features</h1>
 <h2><code>ID_FIELD</code> and its meaning</h2>
 <p>There's a constant in Firestorm called <code>ID_FIELD</code>, which is a JavaScript-side property added afterwards to each query element.</p>
@@ -656,7 +603,62 @@ Allowed memory size of 134217728 bytes exhausted (tried to allocate 32360168 byt
 <p>If you encounter a memory allocation issue, simply change the memory limit in <code>/etc/php/7.4/apache2/php.ini</code> to be bigger:</p>
 <pre class="prettyprint source"><code>memory_limit = 256M
 </code></pre>
-<p>If this doesn't help, considering splitting your collection into smaller collections and linking them together with methods.</p></article>
+<p>If this doesn't help, considering splitting your collection into smaller collections and linking them together with methods.</p>
+<h1>TypeScript Support</h1>
+<p>Firestorm ships with TypeScript support out of the box.</p>
+<h2>Collection types</h2>
+<p>Collections in TypeScript take a generic parameter <code>T</code>, which is the type of each element in the collection. If you aren't using a relational collection, this can simply be set to <code>any</code>. The generic parameter must contain an <code>ID_FIELD</code> imported from Firestorm (unless you're using a non-relational collection).</p>
+<pre class="prettyprint source lang-ts"><code>import firestorm from &quot;firestorm-db&quot;;
+firestorm.address(&quot;ADDRESS_VALUE&quot;);
+
+interface User {
+    [firestorm.ID_FIELD]: string;
+    name: string;
+    password: string;
+    pets: string[];
+}
+
+const userCollection = firestorm.collection&lt;User>(&quot;users&quot;);
+
+const johnDoe = await userCollection.get(123456789);
+// type: { [ID_FIELD]: string, name: string, password: string, pets: string[] }
+</code></pre>
+<p>Injected methods should also be stored in this interface. They'll get filtered out from write operations to prevent false positives:</p>
+<pre class="prettyprint source lang-ts"><code>import firestorm from &quot;firestorm-db&quot;;
+firestorm.address(&quot;ADDRESS_VALUE&quot;);
+
+interface User {
+    [firestorm.ID_FIELD]: string;
+    name: string;
+    hello(): string;
+}
+
+const userCollection = firestorm.collection(&quot;users&quot;, (el) => {
+    // interface types should agree with injected methods
+    el.hello = () => `${el.name} says hello!`;
+    return el;
+});
+
+const johnDoe = await userCollection.get(123456789);
+const hello = johnDoe.hello(); // type: string
+
+await userCollection.add({
+    name: &quot;Mary Doe&quot;,
+    // error: 'hello' does not exist in type 'Addable&lt;User>'.
+    hello() {
+        return &quot;Mary Doe says hello!&quot;
+    }
+})
+</code></pre>
+<h2>Additional types</h2>
+<p>Additional types exist for search criteria options, write method return types, configuration methods, the file handler, etc.</p>
+<pre class="prettyprint source lang-ts"><code>import firestorm from &quot;firestorm-db&quot;;
+const address = firestorm.address(&quot;ADDRESS_VALUE&quot;);
+// type: string
+
+const deleteConfirmation = await firestorm.files.delete(&quot;/quote.txt&quot;);
+// type: firestorm.WriteConfirmation
+</code></pre></article>
     </section>
 
 
@@ -671,7 +673,7 @@ Allowed memory size of 134217728 bytes exhausted (tried to allocate 32360168 byt
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Fri Aug 08 2025 20:25:40 GMT+0000 (Coordinated Universal Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Fri Aug 08 2025 21:37:21 GMT+0000 (Coordinated Universal Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

@@ -157,7 +157,7 @@ export interface SelectOption<T extends any[]> {
 
 export interface ValueOption<K, F extends boolean> {
 	/** Field to search */
-	field: K | "id";
+	field: K;
 	/** Flatten array fields? (default false) */
 	flatten?: F;
 }
@@ -174,17 +174,20 @@ export type RemoveMethods<T> = Pick<
 >;
 
 /** ID field not known at add time */
-export type Addable<T> = Omit<RemoveMethods<T>, "id">;
+export type Addable<T> = Omit<RemoveMethods<T>, typeof ID_FIELD>;
 /** ID field known at add time */
 export type Settable<T> = Addable<T> & {
-	id?: number | string;
+	[ID_FIELD]?: number | string;
 };
+
+/** Helper type for non-relational collections */
+export type WithoutID<T extends { [ID_FIELD]: string }> = Omit<T, typeof ID_FIELD>;
 
 /**
  * Represents a Firestorm Collection
  * @template T - Type of collection element
  */
-declare class Collection<T> {
+declare class Collection<T extends { [ID_FIELD]: string }> {
 	/** Name of the Firestorm collection */
 	public readonly collectionName: string;
 
@@ -214,7 +217,7 @@ declare class Collection<T> {
 	 * @param keys - Array of keys to search
 	 * @returns The found elements
 	 */
-	public searchKeys(keys: string[] | number[]): Promise<T[]>;
+	public searchKeys(keys: (string | number)[]): Promise<T[]>;
 
 	/**
 	 * Search through the collection
@@ -222,17 +225,16 @@ declare class Collection<T> {
 	 * @param random - Random result seed, disabled by default, but can activated with true or a given seed
 	 * @returns The found elements
 	 */
-	public search(
-		options: SearchOption<RemoveMethods<T> & { id: string }>[],
-		random?: boolean | number,
-	): Promise<T[]>;
+	public search(options: SearchOption<RemoveMethods<T>>[], random?: boolean | number): Promise<T[]>;
 
 	/**
 	 * Read the entire collection
 	 * @param original - Disable ID field injection for easier iteration (default false)
 	 * @returns The entire collection
 	 */
-	public readRaw(original?: boolean): Promise<Record<string, T>>;
+	public readRaw<O extends boolean = false>(
+		original?: O,
+	): Promise<Record<string, O extends true ? WithoutID<T> : T>>;
 
 	/**
 	 * Read the entire collection
@@ -248,9 +250,9 @@ declare class Collection<T> {
 	 * @param option - The fields you want to select
 	 * @returns Selected fields
 	 */
-	public select<K extends Array<"id" | keyof T>>(
+	public select<K extends Array<keyof T>>(
 		option: SelectOption<K>,
-	): Promise<Record<string, Pick<T & { id: string }, K[number]>>>;
+	): Promise<Record<string, Pick<T, K[number]>>>;
 
 	/**
 	 * Get all distinct non-null values for a given key across a collection
@@ -276,7 +278,7 @@ declare class Collection<T> {
 	 * @param value - The value to write
 	 * @returns Write confirmation
 	 */
-	public writeRaw(value: Record<string, RemoveMethods<T>>): Promise<WriteConfirmation>;
+	public writeRaw(value: Record<string, Addable<T>>): Promise<WriteConfirmation>;
 
 	/**
 	 * Set the entire content of the collection.
@@ -285,7 +287,7 @@ declare class Collection<T> {
 	 * @param value - The value to write
 	 * @returns Write confirmation
 	 */
-	public write_raw(value: Record<string, RemoveMethods<T>>): Promise<WriteConfirmation>;
+	public write_raw(value: Record<string, Addable<T>>): Promise<WriteConfirmation>;
 
 	/**
 	 * Append a value to the collection
@@ -315,7 +317,7 @@ declare class Collection<T> {
 	 * @param keys - The keys of the elements you want to remove
 	 * @returns Write confirmation
 	 */
-	public removeBulk(keys: string[] | number[]): Promise<WriteConfirmation>;
+	public removeBulk(keys: (string | number)[]): Promise<WriteConfirmation>;
 
 	/**
 	 * Set a value in the collection by its key
@@ -331,7 +333,7 @@ declare class Collection<T> {
 	 * @param values - The values (without methods) you want to set
 	 * @returns Write confirmation
 	 */
-	public setBulk(keys: string[] | number[], values: Settable<T>[]): Promise<WriteConfirmation>;
+	public setBulk(keys: (string | number)[], values: Settable<T>[]): Promise<WriteConfirmation>;
 
 	/**
 	 * Edit an element's field in the collection
@@ -371,7 +373,10 @@ export function token(value?: string): string;
  * @param addMethods - Additional methods and data to add to the objects
  * @returns The collection instance
  */
-export function collection<T>(value: string, addMethods?: CollectionMethods<T>): Collection<T>;
+export function collection<T extends { [ID_FIELD]: string }>(
+	value: string,
+	addMethods?: CollectionMethods<T>,
+): Collection<T>;
 
 /**
  * Create a temporary Firestorm collection with no methods
@@ -379,7 +384,7 @@ export function collection<T>(value: string, addMethods?: CollectionMethods<T>):
  * @param table - The table name to get
  * @returns The table instance
  */
-export function table<T>(table: string): Collection<T>;
+export function table<T extends { [ID_FIELD]: string }>(table: string): Collection<T>;
 
 /**
  * Firestorm file handler

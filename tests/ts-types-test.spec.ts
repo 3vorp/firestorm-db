@@ -7,7 +7,7 @@ import firestorm from "..";
 
 // let's declare an interface for our collection
 interface User {
-	id: string;
+	[firestorm.ID_FIELD]: string;
 	name: string;
 }
 
@@ -36,7 +36,7 @@ usersWithMethods.select({ fields: ["name", "family"] }); // getNameAsLowerCase n
 
 // 1. search through a collection
 interface User {
-	id: string;
+	[firestorm.ID_FIELD]: string;
 	name: string;
 	age: number;
 	sex: "female" | "male" | "other";
@@ -63,7 +63,7 @@ users.search([
 
 // 2. collections can interface with each other
 interface Family {
-	id: string;
+	[firestorm.ID_FIELD]: string;
 	parents: User[];
 	children: User[];
 	getDad(): Promise<User>;

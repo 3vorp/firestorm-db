@@ -281,72 +281,6 @@ deletePromise
     .catch((err) => console.error(err));
 ```
 
-# TypeScript Support
-
-Firestorm ships with TypeScript support out of the box.
-
-## Collection types
-
-Collections in TypeScript take a generic parameter `T`, which is the type of each element in the collection. If you aren't using a relational collection, this can simply be set to `any`.
-
-```ts
-import firestorm from "firestorm-db";
-firestorm.address("ADDRESS_VALUE");
-
-interface User {
-    name: string;
-    password: string;
-    pets: string[];
-}
-
-const userCollection = firestorm.collection<User>("users");
-
-const johnDoe = await userCollection.get(123456789);
-// type: { name: string, password: string, pets: string[] }
-```
-
-Injected methods should also be stored in this interface. They'll get filtered out from write operations to prevent false positives:
-
-```ts
-import firestorm from "firestorm-db";
-firestorm.address("ADDRESS_VALUE");
-
-interface User {
-    name: string;
-    hello(): string;
-}
-
-const userCollection = firestorm.collection("users", (el) => {
-    // interface types should agree with injected methods
-    el.hello = () => `${el.name} says hello!`;
-    return el;
-});
-
-const johnDoe = await userCollection.get(123456789);
-const hello = johnDoe.hello(); // type: string
-
-await userCollection.add({
-    name: "Mary Doe",
-    // error: 'hello' does not exist in type 'Addable<User>'.
-    hello() {
-        return "Mary Doe says hello!"
-    }
-})
-```
-
-## Additional types
-
-Additional types exist for search criteria options, write method return types, configuration methods, the file handler, etc.
-
-```ts
-import firestorm from "firestorm-db";
-const address = firestorm.address("ADDRESS_VALUE");
-// type: string
-
-const deleteConfirmation = await firestorm.files.delete("/quote.txt");
-// type: firestorm.WriteConfirmation
-```
-
 # Advanced Features
 
 ## `ID_FIELD` and its meaning
@@ -460,3 +394,71 @@ memory_limit = 256M
 ```
 
 If this doesn't help, considering splitting your collection into smaller collections and linking them together with methods.
+
+# TypeScript Support
+
+Firestorm ships with TypeScript support out of the box.
+
+## Collection types
+
+Collections in TypeScript take a generic parameter `T`, which is the type of each element in the collection. If you aren't using a relational collection, this can simply be set to `any`. The generic parameter must contain an `ID_FIELD` imported from Firestorm (unless you're using a non-relational collection).
+
+```ts
+import firestorm from "firestorm-db";
+firestorm.address("ADDRESS_VALUE");
+
+interface User {
+    [firestorm.ID_FIELD]: string;
+    name: string;
+    password: string;
+    pets: string[];
+}
+
+const userCollection = firestorm.collection<User>("users");
+
+const johnDoe = await userCollection.get(123456789);
+// type: { [ID_FIELD]: string, name: string, password: string, pets: string[] }
+```
+
+Injected methods should also be stored in this interface. They'll get filtered out from write operations to prevent false positives:
+
+```ts
+import firestorm from "firestorm-db";
+firestorm.address("ADDRESS_VALUE");
+
+interface User {
+    [firestorm.ID_FIELD]: string;
+    name: string;
+    hello(): string;
+}
+
+const userCollection = firestorm.collection("users", (el) => {
+    // interface types should agree with injected methods
+    el.hello = () => `${el.name} says hello!`;
+    return el;
+});
+
+const johnDoe = await userCollection.get(123456789);
+const hello = johnDoe.hello(); // type: string
+
+await userCollection.add({
+    name: "Mary Doe",
+    // error: 'hello' does not exist in type 'Addable<User>'.
+    hello() {
+        return "Mary Doe says hello!"
+    }
+})
+```
+
+## Additional types
+
+Additional types exist for search criteria options, write method return types, configuration methods, the file handler, etc.
+
+```ts
+import firestorm from "firestorm-db";
+const address = firestorm.address("ADDRESS_VALUE");
+// type: string
+
+const deleteConfirmation = await firestorm.files.delete("/quote.txt");
+// type: firestorm.WriteConfirmation
+```

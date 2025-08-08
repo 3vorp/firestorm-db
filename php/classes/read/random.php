@@ -1,7 +1,5 @@
 <?php
 
-require_once './classes/HTTPException.php';
-
 function make_seed() {
     [$usec, $sec] = explode(' ', microtime());
     return intval($sec + $usec * 1000000);

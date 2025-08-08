@@ -231,7 +231,7 @@ class Collection {
 
 	/**
 	 * Get multiple elements from the collection by their keys
-	 * @param {(string | number)[]} keys - Array of keys to search
+	 * @param {Array<string | number>} keys - Array of keys to search
 	 * @returns {Promise<T[]>} The found elements
 	 */
 	async searchKeys(keys) {
@@ -454,7 +454,7 @@ class Collection {
 
 	/**
 	 * Remove multiple elements from the collection by their keys
-	 * @param {(string | number)[]} keys The key from the entries to remove
+	 * @param {Array<string | number>} keys The key from the entries to remove
 	 * @returns {Promise<WriteConfirmation>} Write confirmation
 	 */
 	removeBulk(keys) {
@@ -475,7 +475,7 @@ class Collection {
 
 	/**
 	 * Set multiple values in the collection by their keys
-	 * @param {(string | number)[]} keys - The keys of the elements you want to edit
+	 * @param {Array<string | number>} keys - The keys of the elements you want to edit
 	 * @param {T[]} values - The values (without methods) you want to edit
 	 * @returns {Promise<WriteConfirmation>} Write confirmation
 	 */

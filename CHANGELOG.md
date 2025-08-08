@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reduced payload size for `Collection.get`.
 - Use modern async/await for client code (supported in all major browers/Node.js since 2017).
 - Made `firestorm.files.get` a generic method for increased type safety.
+- Stricter type checking for `array-contains` search methods.
 
 ### Fixed
 

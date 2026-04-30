@@ -33,20 +33,23 @@ The JavaScript [index.js](./src/index.js) file is simply an [Axios](https://www.
 
 ## JavaScript setup
 
-First, set your API address (and your writing token if needed) using the `address()` and `token()` setters. If you need to later retrieve these values, you can use the same functions as getters with no parameters:
+Every Firestorm database starts by creating a new server instance with the `createFirestorm` function. This takes a number of configuration options as an object argument, which can then be retrieved or set using the corresponding fields.
 
 ```js
-// only needed in Node.js; including the script tag in a browser is enough otherwise.
-const firestorm = require("firestorm-db");
+const { createFirestorm } = require("firestorm-db");
 
-firestorm.address("https://example.com/path/to/firestorm/root/");
+// All of these arguments are optional and can be specified by directly setting the fields if needed.
+const firestorm = createFirestorm({
+    /** The name of the instance internally, useful for reflection and error messages */
+    name: "production",
+    /** The base address of your Firestorm setup, with a slash on the end. */
+    address: "https://example.com/path/to/firestorm/root/",
+    /** Your write token, if it exists. It must exactly match a value from your tokens.php file. */
+    token: "my_secret_token_probably_from_an_env_file",
+});
 
-// only necessary if you want to write or access private collections
-// must match token stored in tokens.php file
-firestorm.token("my_secret_token_probably_from_an_env_file");
-
-const address = firestorm.address();
-// returns "https://example.com/path/to/firestorm/root"
+firestorm.address // returns "https://example.com/path/to/firestorm/root"
+firestorm.name = "dev"; // sets the debugging name to dev
 ```
 
 Now you can use Firestorm to its full potential.
@@ -59,7 +62,8 @@ Firestorm is based around the concept of a `Collection`, which is akin to an SQL
 - A method adder, which lets you inject methods to query results. It's implemented similarly to [`Array.prototype.map`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map), taking a queried element as an argument, modifying the element with methods and data inside a callback, and returning the modified element at the end.
 
 ```js
-const firestorm = require("firestorm-db");
+const { createFirestorm } = require("firestorm-db");
+const firestorm = createFirestorm({ address, token });
 
 const userCollection = firestorm.collection("users", (el) => {
     // assumes you have a 'users' table with a printable field called 'name'
@@ -244,9 +248,8 @@ There is additionally an overwrite option in order to avoid mistakes.
 
 ```js
 const FormData = require("form-data");
-const firestorm = require("firestorm-db");
-firestorm.address("ADDRESS_VALUE");
-firestorm.token("TOKEN_VALUE");
+const { createFirestorm } = require("firestorm-db");
+const firestorm = createFirestorm({ address, token });
 
 const form = new FormData();
 form.append("path", "/quote.txt");
@@ -267,8 +270,10 @@ uploadPromise
 `firestorm.files.get` takes a file's direct URL location or its content as its parameter. If your upload folder is accessible from a server URL, you can directly use its address to retrieve the file without this method.
 
 ```js
-const firestorm = require("firestorm-db");
-firestorm.address("ADDRESS_VALUE");
+const { createFirestorm } = require("firestorm-db");
+
+// no write token is required to use this method
+const firestorm = createFirestorm({ address });
 
 const getPromise = firestorm.files.get("/quote.txt");
 
@@ -282,9 +287,9 @@ getPromise
 `firestorm.files.delete` has the same interface as `firestorm.files.get`, but as the name suggests, it deletes the file.
 
 ```js
-const firestorm = require("firestorm-db");
-firestorm.address("ADDRESS_VALUE");
-firestorm.token("TOKEN_VALUE");
+
+const { createFirestorm } = require("firestorm-db");
+const firestorm = createFirestorm({ address, token });
 
 const deletePromise = firestorm.files.delete("/quote.txt");
 
@@ -297,20 +302,20 @@ deletePromise
 
 ## `ID_FIELD` and its meaning
 
-There's a constant in Firestorm called `ID_FIELD`, which is a JavaScript-side property added afterwards to each query element.
+There's a constant field in all Firestorm collections called `ID_FIELD`, which is a JavaScript-side property added afterwards to each query element.
 
-Its value will always be the key of the element its in, which allows you to use `Object.values` on results without worrying about losing the elements' key names. Additionally, it can be used in the method adder in the constructor, and is convenient for collections where the key name is significant.
+Its value will always be the key of the element its in, which allows you to use `Object.values` on results without worrying about losing the elements' key names. Additionally, it can be used in the method adder in the constructor, and is convenient for collections where the key name is significant. By default, it's set to the literal `"id"`, but can be changed by setting the value on the collection instance if the key name is already used elsewhere in your database schema.
 
 ```js
-const userCollection = firestorm.collection("users", (el) => {
-    el.basicInfo = () => `${el.name} (${el[firestorm.ID_FIELD]})`;
+const userCollection = firestorm.collection("users", (el, collection) => {
+    el.basicInfo = () => `${el.name} (${el[collection.ID_FIELD]})`;
     return el;
 });
 
 const returnedID = await userCollection.add({ name: "Bob", age: 30 });
 const returnedUser = await userCollection.get(returnedID);
 
-console.log(returnedID === returnedUser[firestorm.ID_FIELD]); // true
+console.log(returnedID === returnedUser[userCollection.ID_FIELD]); // true
 
 returnedUser.basicInfo(); // Bob (123456789)
 ```
@@ -357,13 +362,13 @@ Using add methods in the constructor, you can link multiple collections together
 const orders = firestorm.collection("orders");
 
 // using the example of a customer having orders
-const customers = firestorm.collection("customers", (el) => {
+const customers = firestorm.collection("customers", (el, collection) => {
     el.getOrders = () => orders.search([
         {
             field: "customer",
             criteria: "==",
             // assuming the customers field in the orders collection is a user ID
-            value: el[firestorm.ID_FIELD]
+            value: el[collection.ID_FIELD]
         }
     ])
     return el;
@@ -424,16 +429,13 @@ Firestorm ships with TypeScript support out of the box.
 
 Collections in TypeScript take a generic parameter `T`, which is the type of each element in the collection. If you aren't using a relational collection, this can simply be set to `any`.
 
-The generic parameter must contain a string field named `ID_FIELD` imported from Firestorm (unless you're using a non-relational collection).
+If you need to use your generic type later with the added `ID_FIELD` property, wrap it in the `WithID<T>` helper type.
 
 ```ts
-import firestorm from "firestorm-db";
-firestorm.address("ADDRESS_VALUE");
+const { createFirestorm } = require("firestorm-db");
+const firestorm = createFirestorm({ address, token });
 
 interface User {
-    // An ID field is required by a generic constraint
-    // (unless the collection is non-relational)
-    [firestorm.ID_FIELD]: string;
     name: string;
     password: string;
     pets: string[];
@@ -442,17 +444,16 @@ interface User {
 const userCollection = firestorm.collection<User>("users");
 
 const johnDoe = await userCollection.get(123456789);
-// type: { [ID_FIELD]: string, name: string, password: string, pets: string[] }
+// type: { [userCollection.ID_FIELD]: string, name: string, password: string, pets: string[] }
 ```
 
 Injected methods should also be stored in this interface. They'll be filtered out from write operations correctly, so don't worry about potential typing inaccuracies:
 
 ```ts
-import firestorm from "firestorm-db";
-firestorm.address("ADDRESS_VALUE");
+const { createFirestorm } = require("firestorm-db");
+const firestorm = createFirestorm({ address, token });
 
 interface User {
-    [firestorm.ID_FIELD]: string;
     name: string;
     hello(): string;
 }

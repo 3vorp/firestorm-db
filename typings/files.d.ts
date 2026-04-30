@@ -1,6 +1,6 @@
 import * as NodeFormData from "form-data";
 import type { Firestorm } from "./index.d.ts";
-import type { WriteConfirmation } from "./collection.d.ts";
+import type { WriteConfirmation } from "./utils.d.ts";
 
 /**
  * Firestorm file manager

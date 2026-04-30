@@ -1,193 +1,4 @@
-export type NumberCriteria =
-	| "==" /** Value is equal to the provided value */
-	| "!=" /** Value is not equal to the provided value */
-	| "<" /** Value is less than the provided value */
-	| "<=" /** Value is less than or equal to the provided value */
-	| ">" /** Value is greater than the provided value */
-	| ">=" /** Value is greater than or equal to the provided value */
-	| "in"; /** Value is in the given array */
-
-export type StringCriteria =
-	| "==" /** String value is equal to the provided value */
-	| "!=" /** String value is not equal to the provided value */
-	| "<" /** String value length is less than the provided value */
-	| "<=" /** String value length is less than or equal to the provided value */
-	| ">" /** String value length is greater than the provided value */
-	| ">=" /** String value length is greater than or equal to the provided value */
-	| "in" /** String value is in the given array */
-	| "includes" /** String value includes the provided value */
-	| "contains" /** Alias of "includes" */
-	| "startsWith" /** String value starts with the provided value */
-	| "endsWith"; /** String value ends with the provided value */
-
-export type ArrayCriteria =
-	| "array-contains" /** Value is in the given array */
-	| "array-contains-none" /** No value of the array is in the given array */
-	| "array-contains-any" /** Any value of the array is in the given array */
-	| "array-contains-all" /** Every value of the array is in the given array */
-	| "array-length-eq" /** Array length is equal to the provided value */
-	| "array-length-df" /** Array length is different from the provided value */
-	| "array-length-gt" /** Array length is greater than the provided value */
-	| "array-length-lt" /** Array length is less than the provided value */
-	| "array-length-ge" /** Array length is greater than or equal to the provided value */
-	| "array-length-le"; /** Array length is less than or equal to the provided value */
-
-export type BooleanCriteria =
-	| "!=" /** Value is not equal to the provided value */
-	| "=="; /** Value is equal to the provided value */
-
-export type AnyCriteria = StringCriteria | ArrayCriteria | BooleanCriteria | NumberCriteria;
-
-export type Criteria<T> = T extends Function
-	? never
-	:
-				| never /** Methods are not allowed in the field (they are not saved in the collection JSON file) */
-				| T extends Array<unknown>
-		? ArrayCriteria
-		: never | T extends string
-			? StringCriteria
-			: never | T extends number
-				? NumberCriteria
-				: never | T extends boolean
-					? BooleanCriteria
-					: never;
-
-export type AnyOperation =
-	| "set" /** @param value - set the field to the given value */
-	| "remove" /** @param value - remove the field */;
-
-export type StringOperation = "append" /** @param value - append the given value to the field */;
-
-export type NumberOperation =
-	| "increment" /** @param value - increment the field by the given value, or by one */
-	| "decrement" /** @param value - decrement the field by the given value, or by one */;
-
-export type ArrayOperation =
-	| "array-push" /** @param value - push the given value to the field */
-	| "array-delete" /** @param index - delete the value at the given index @see https://www.php.net/manual/fr/function.array-splice */
-	| "array-splice" /** @param indexes - remove certain elements of the array field @see https://www.php.net/manual/fr/function.array-splice */;
-
-type _Operation<T> = T extends string
-	? StringOperation
-	: never | T extends number
-		? NumberOperation
-		: never | T extends Array<unknown>
-			? ArrayOperation
-			: never | T extends object | Function
-				? never
-				: never;
-
-export type Operation<T> =
-	| {
-			[K in keyof T]: _Operation<T[K]>;
-	  }[keyof T]
-	| AnyOperation;
-
-type BaseEditField<T> = {
-	[K in keyof T]: {
-		id: number | string;
-	};
-}[keyof T];
-
-type Field<P, T> = {
-	[K in keyof T]: T[K] extends P ? K : never;
-}[keyof T];
-
-export type EditFieldOption<T> = {
-	[K in keyof T]: BaseEditField<T> &
-		(
-			| {
-					field: K | string;
-					operation: "remove" | "append";
-			  }
-			| {
-					field: Field<boolean, T>;
-					operation: "invert";
-			  }
-			| {
-					field: Field<number, T>;
-					operation: "increment" | "decrement";
-					value?: Number;
-			  }
-			| {
-					field: Field<T[K], T> | string;
-					operation: "set";
-					value: T[K] | any;
-			  }
-			| {
-					field: Field<Array<unknown>, T>;
-					operation: "array-push";
-					value: T[K];
-			  }
-			| {
-					field: Field<Array<unknown>, T>;
-					operation: "array-delete";
-					value: number;
-			  }
-			| {
-					field: Field<Array<unknown>, T>;
-					operation: "array-splice";
-					value: [number, number] | [number, number, T[Field<Array<unknown>, T>][any]];
-			  }
-		);
-}[keyof T];
-
-/** Write status */
-export type WriteConfirmation = { message: string };
-
-export type SearchOption<T> = {
-	[K in keyof T]: {
-		/** The field to be searched for */
-		field: Path<T>;
-		/** Search criteria to filter results */
-		criteria: Criteria<T[K]>;
-		/** The value to be searched for */
-		value?: any;
-		/** Is it case sensitive? (default true) */
-		ignoreCase?: boolean;
-	};
-}[keyof T];
-
-export type SearchResultOptions = {
-	/** Random result seed, disabled by default, but can activated with true or a given seed */
-	random?: boolean | number;
-	/** Limit the number of results returned (only applies if random is false) */
-	limit?: number;
-};
-
-export interface SelectOption<T extends any[]> {
-	/** Selected fields to be returned */
-	fields: T;
-}
-
-export interface ValueOption<K, F extends boolean> {
-	/** Field to search */
-	field: K;
-	/** Flatten array fields? (default false) */
-	flatten?: F;
-}
-
-/** Add methods to found elements */
-export type AddMethods<T> = (element: T, collection: Collection<T>) => T;
-
-/** Remove methods from a type */
-export type RemoveMethods<T> = Pick<
-	T,
-	{
-		[K in keyof T]: T[K] extends Function ? never : K;
-	}[keyof T]
->;
-
-/** ID field not known at add time */
-export type Addable<T> = Omit<RemoveMethods<T>, "id">;
-/** ID field known at add time */
-export type Settable<T> = Addable<T> & {
-	id?: number | string;
-};
-
-/** Helper type for non-relational collections */
-export type WithoutID<T> = Omit<T, "id">;
-export type WithID<T> = T & { id: string };
+import type { Path, WriteConfirmation } from "./utils.d.ts";
 
 /**
  * Represents a Firestorm Collection
@@ -357,29 +168,190 @@ export interface Collection<T> {
 	editFieldBulk(options: EditFieldOption<RemoveMethods<T>>[]): Promise<WriteConfirmation>;
 }
 
-/**
- * taken from https://github.com/toonvanstrijp/nestjs-i18n/blob/3fc33c105a68b112ed7af6237c5f49902d0864b6/src/types.ts#L27
- * allows for recursive keyof usage
- */
+export type NumberCriteria =
+	| "==" /** Value is equal to the provided value */
+	| "!=" /** Value is not equal to the provided value */
+	| "<" /** Value is less than the provided value */
+	| "<=" /** Value is less than or equal to the provided value */
+	| ">" /** Value is greater than the provided value */
+	| ">=" /** Value is greater than or equal to the provided value */
+	| "in"; /** Value is in the given array */
 
-type IsAny<T> = unknown extends T ? ([keyof T] extends [never] ? false : true) : false;
+export type StringCriteria =
+	| "==" /** String value is equal to the provided value */
+	| "!=" /** String value is not equal to the provided value */
+	| "<" /** String value length is less than the provided value */
+	| "<=" /** String value length is less than or equal to the provided value */
+	| ">" /** String value length is greater than the provided value */
+	| ">=" /** String value length is greater than or equal to the provided value */
+	| "in" /** String value is in the given array */
+	| "includes" /** String value includes the provided value */
+	| "contains" /** Alias of "includes" */
+	| "startsWith" /** String value starts with the provided value */
+	| "endsWith"; /** String value ends with the provided value */
 
-type PathImpl<T, Key extends keyof T> = Key extends string
-	? IsAny<T[Key]> extends true
-		? never
-		: T[Key] extends Record<string, any>
-			?
-					| `${Key}.${PathImpl<T[Key], Exclude<keyof T[Key], keyof any[]>> & string}`
-					| `${Key}.${Exclude<keyof T[Key], keyof any[]> & string}`
-			: never
-	: never;
+export type ArrayCriteria =
+	| "array-contains" /** Value is in the given array */
+	| "array-contains-none" /** No value of the array is in the given array */
+	| "array-contains-any" /** Any value of the array is in the given array */
+	| "array-contains-all" /** Every value of the array is in the given array */
+	| "array-length-eq" /** Array length is equal to the provided value */
+	| "array-length-df" /** Array length is different from the provided value */
+	| "array-length-gt" /** Array length is greater than the provided value */
+	| "array-length-lt" /** Array length is less than the provided value */
+	| "array-length-ge" /** Array length is greater than or equal to the provided value */
+	| "array-length-le"; /** Array length is less than or equal to the provided value */
 
-type PathImpl2<T> = PathImpl<T, keyof T> | keyof T;
+export type BooleanCriteria =
+	| "!=" /** Value is not equal to the provided value */
+	| "=="; /** Value is equal to the provided value */
 
-export type Path<T> = keyof T extends string
-	? PathImpl2<T> extends infer P
-		? P extends string | keyof T
-			? P
-			: keyof T
-		: keyof T
-	: never;
+export type AnyCriteria = StringCriteria | ArrayCriteria | BooleanCriteria | NumberCriteria;
+
+export type Criteria<T> = T extends Function
+	? never
+	:
+				| never /** Methods are not allowed in the field (they are not saved in the collection JSON file) */
+				| T extends Array<unknown>
+		? ArrayCriteria
+		: never | T extends string
+			? StringCriteria
+			: never | T extends number
+				? NumberCriteria
+				: never | T extends boolean
+					? BooleanCriteria
+					: never;
+
+export type AnyOperation =
+	| "set" /** @param value - set the field to the given value */
+	| "remove" /** @param value - remove the field */;
+
+export type StringOperation = "append" /** @param value - append the given value to the field */;
+
+export type NumberOperation =
+	| "increment" /** @param value - increment the field by the given value, or by one */
+	| "decrement" /** @param value - decrement the field by the given value, or by one */;
+
+export type ArrayOperation =
+	| "array-push" /** @param value - push the given value to the field */
+	| "array-delete" /** @param index - delete the value at the given index @see https://www.php.net/manual/fr/function.array-splice */
+	| "array-splice" /** @param indexes - remove certain elements of the array field @see https://www.php.net/manual/fr/function.array-splice */;
+
+type _Operation<T> = T extends string
+	? StringOperation
+	: never | T extends number
+		? NumberOperation
+		: never | T extends Array<unknown>
+			? ArrayOperation
+			: never | T extends object | Function
+				? never
+				: never;
+
+export type Operation<T> =
+	| {
+			[K in keyof T]: _Operation<T[K]>;
+	  }[keyof T]
+	| AnyOperation;
+
+type BaseEditField<T> = {
+	[K in keyof T]: {
+		id: number | string;
+	};
+}[keyof T];
+
+type Field<P, T> = {
+	[K in keyof T]: T[K] extends P ? K : never;
+}[keyof T];
+
+export type EditFieldOption<T> = {
+	[K in keyof T]: BaseEditField<T> &
+		(
+			| {
+					field: K | string;
+					operation: "remove" | "append";
+			  }
+			| {
+					field: Field<boolean, T>;
+					operation: "invert";
+			  }
+			| {
+					field: Field<number, T>;
+					operation: "increment" | "decrement";
+					value?: Number;
+			  }
+			| {
+					field: Field<T[K], T> | string;
+					operation: "set";
+					value: T[K] | any;
+			  }
+			| {
+					field: Field<Array<unknown>, T>;
+					operation: "array-push";
+					value: T[K];
+			  }
+			| {
+					field: Field<Array<unknown>, T>;
+					operation: "array-delete";
+					value: number;
+			  }
+			| {
+					field: Field<Array<unknown>, T>;
+					operation: "array-splice";
+					value: [number, number] | [number, number, T[Field<Array<unknown>, T>][any]];
+			  }
+		);
+}[keyof T];
+
+export type SearchOption<T> = {
+	[K in keyof T]: {
+		/** The field to be searched for */
+		field: Path<T>;
+		/** Search criteria to filter results */
+		criteria: Criteria<T[K]>;
+		/** The value to be searched for */
+		value?: any;
+		/** Is it case sensitive? (default true) */
+		ignoreCase?: boolean;
+	};
+}[keyof T];
+
+export type SearchResultOptions = {
+	/** Random result seed, disabled by default, but can activated with true or a given seed */
+	random?: boolean | number;
+	/** Limit the number of results returned (only applies if random is false) */
+	limit?: number;
+};
+
+export interface SelectOption<T extends any[]> {
+	/** Selected fields to be returned */
+	fields: T;
+}
+
+export interface ValueOption<K, F extends boolean> {
+	/** Field to search */
+	field: K;
+	/** Flatten array fields? (default false) */
+	flatten?: F;
+}
+
+/** Add methods to found elements */
+export type AddMethods<T> = (element: T, collection: Collection<T>) => T;
+
+/** Remove methods from a type */
+export type RemoveMethods<T> = Pick<
+	T,
+	{
+		[K in keyof T]: T[K] extends Function ? never : K;
+	}[keyof T]
+>;
+
+/** ID field not known at add time */
+export type Addable<T> = Omit<RemoveMethods<T>, "id">;
+/** ID field known at add time */
+export type Settable<T> = Addable<T> & {
+	id?: number | string;
+};
+
+/** Helper type for non-relational collections */
+export type WithoutID<T> = Omit<T, "id">;
+export type WithID<T> = T & { id: string };

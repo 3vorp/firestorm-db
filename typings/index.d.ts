@@ -2,23 +2,26 @@ import type { FirestormFiles } from "./files.d.ts";
 import type { Collection, AddMethods } from "./collection.d.ts";
 
 export interface FirestormCreationOption {
+	/** Instance name (can be helpful for debugging) */
 	name?: string;
+	/** Firestorm server address */
 	address?: string;
+	/** Firestorm write token */
 	token?: string;
 }
 
-declare class Firestorm {
+export interface Firestorm {
 	/** Name of the Firestorm instance (defaults to address) */
-	public name: string;
+	name: string;
 
 	/** Address of the Firestorm instance */
-	public address?: string;
+	address?: string;
 
 	/** Writing token for the Firestorm instance */
-	public token?: string;
+	token?: string;
 
 	/** Firestorm file manager */
-	public readonly files: FirestormFiles;
+	readonly files: FirestormFiles;
 
 	/**
 	 * Create a new Firestorm collection instance
@@ -26,10 +29,20 @@ declare class Firestorm {
 	 * @param addMethods - Additional methods and data to add to the objects
 	 * @returns The collection instance
 	 */
-	public collection<T>(name: string, addMethods?: AddMethods<T>): Collection<T>;
+	collection<T>(name: string, addMethods?: AddMethods<T>): Collection<T>;
 }
 
+/**
+ * Create a new Firestorm instance
+ * - All parameters are optional and can be edited using the name, address, and token fields
+ * @param params - Firestorm instance name, server address, and write token
+ * @returns {Firestorm} Firestorm instance
+ */
 export function createFirestorm(params?: FirestormCreationOption): Firestorm;
+
+/** Get the current version of Firestorm */
 export const clientVersion: string;
+
 export type * from "./collection.d.ts";
 export type * from "./files.d.ts";
+export type * from "./utils.d.ts";

@@ -74,7 +74,7 @@ firestorm.collection<Family>("families", (el, col) => {
 		users
 			.search([
 				// === family id
-				{ field: "family", criteria: "==", value: el[col.ID_FIELD] },
+				{ field: "family", criteria: "==", value: col.ID_FIELD },
 				{ field: "sex", criteria: "==", value: "male" },
 			])
 			.then((res) => res[0]);

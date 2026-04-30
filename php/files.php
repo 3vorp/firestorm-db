@@ -1,8 +1,8 @@
 <?php
 
 // display all errors
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
 error_reporting(E_ALL - E_NOTICE);
 
 require_once './config.php';
@@ -186,17 +186,17 @@ if ($method === 'POST') {
     if ($data === false)
         http_error(400, 'Could not parse input data');
 
-    try {
-        $token = $data['token'];
-    } catch (Exception $e) {
-        http_error(400, 'Failed parsing input data');
-    }
+    if (!array_key_exists('token', $data))
+        http_error(400, 'No token provided');
 
     // verifying token
     if ($token === false)
         http_error(400, 'No token provided');
     if (!in_array($token, $db_tokens))
         http_error(403, 'Invalid token');
+
+    if (!array_key_exists('path', $data))
+        http_error(400, 'No path provided');
 
     $path = trim($data['path']);
     if (strlen($path) === 0)

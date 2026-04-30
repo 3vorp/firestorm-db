@@ -10,6 +10,9 @@ class Log {
 
         $now = new DateTime();
         $fp = fopen($path, 'a');
+        if ($fp === false)
+            throw new Exception("Could not open log path $path");
+
         fwrite($fp, $now->format('Y-m-d H:i:s'));
         fwrite($fp, $message);
         fwrite($fp, '\n');

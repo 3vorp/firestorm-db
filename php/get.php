@@ -4,8 +4,8 @@ require_once './utils.php';
 cors();
 
 // display all errors
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
 error_reporting(E_ALL);
 
 // import useful functions

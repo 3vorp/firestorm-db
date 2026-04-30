@@ -17,23 +17,13 @@
 
 *Self hosted Firestore-like database with API endpoints based on micro bulk operations.*
 
-# Installation
-
-Installing the JavaScript client is as simple as running:
-
-```sh
-npm install firestorm-db
-```
-
-Information about installing Firestorm server-side is given in the [PHP](#php-backend) section.
-
 # JavaScript Client
 
-The JavaScript [index.js](./src/index.js) file is simply an [Axios](https://www.npmjs.com/package/axios) wrapper of the PHP backend.
+The JavaScript [index.js](./src/index.js) file is a wrapper around the backend PHP endpoints, using [Axios](https://www.npmjs.com/package/axios) to handle requests.
 
 ## JavaScript setup
 
-Every Firestorm database starts by creating a new server instance with the `createFirestorm` function. This takes a number of configuration options as an object argument, which can then be retrieved or set using the corresponding fields.
+Every Firestorm database starts by creating a new server instance with the `createFirestorm` function. This takes an object of optional configuration options as an argument, which can then be retrieved or set using the corresponding fields.
 
 ```js
 const { createFirestorm } = require("firestorm-db");
@@ -42,7 +32,7 @@ const { createFirestorm } = require("firestorm-db");
 const firestorm = createFirestorm({
     /** The name of the instance internally, useful for reflection and error messages */
     name: "production",
-    /** The base address of your Firestorm setup, with a slash on the end. */
+    /** The base address of your Firestorm setup, with a slash at the end. */
     address: "https://example.com/path/to/firestorm/root/",
     /** Your write token, if it exists. It must exactly match a value from your tokens.php file. */
     token: "my_secret_token_probably_from_an_env_file",
@@ -135,14 +125,8 @@ The search method can take one or more options to filter entries in a collection
 | `'array-length-le'`     | `number`                      | Entry field's array size is lower or equal to your value        |
 | `'array-length-ge'`     | `number`                      | Entry field's array size is greater or equal to your value      |
 
-### Search Option Properties
 
-| Property    | Type      | Description                                                                |
-| ----------- | --------- | -------------------------------------------------------------------------- |
-| `field`     | `string`  | The field path to search in (supports dot notation for nested fields)      |
-| `criteria`  | `string`  | The comparison criteria to use (see table above)                           |
-| `value`     | `any`     | The value to compare against                                               |
-| `ignoreCase`| `boolean` | Whether to ignore case sensitivity for string comparisons (default: false) |
+The second argument of the `search` method takes an object of modifiers to the result. You can use the `limit` option to cap the searched results to a provided maximum for computationally expensive searches, or use the `random` option to read random results. This argument is optional.
 
 ## Edit field options
 
@@ -159,8 +143,6 @@ Edit objects have an element `id`, a `field` to edit, an `operation` specifying 
 | `array-push `  | Yes         | `any`                    | Pushes an element to the end of an array field.                                                                                        |
 | `array-delete` | Yes         | `number`                 | Removes an array element by index.                                                                                                     |
 | `array-splice` | Yes         | `[number, number, any?]` | Last argument is optional. Check the PHP [array_splice](https://www.php.net/manual/function.array-splice) documentation for more info. |
-
-Various other methods and constants exist in the JavaScript client, which make more sense once you learn what's actually happening behind the scenes.
 
 # PHP Backend
 
@@ -304,7 +286,7 @@ deletePromise
 
 There's a constant field in all Firestorm collections called `ID_FIELD`, which is a JavaScript-side property added afterwards to each query element.
 
-Its value will always be the key of the element its in, which allows you to use `Object.values` on results without worrying about losing the elements' key names. Additionally, it can be used in the method adder in the constructor, and is convenient for collections where the key name is significant. By default, it's set to the literal `"id"`, but can be changed by setting the value on the collection instance if the key name is already used elsewhere in your database schema.
+Its value will always be the key of the element its in, which allows you to use `Object.values` on results without worrying about losing the elements' key names. Additionally, it can be used in the method adder in the constructor, and is convenient for collections where the key name is significant. By default, it's set to the literal `"id"`, but can be changed by setting the value on the collection instance if the key name is already used elsewhere in your database schema (Note: changing the value of ID_FIELD is not recommended due to the lack of typing support).
 
 ```js
 const userCollection = firestorm.collection("users", (el, collection) => {
@@ -428,8 +410,6 @@ Firestorm ships with TypeScript support out of the box.
 ## Collection types
 
 Collections in TypeScript take a generic parameter `T`, which is the type of each element in the collection. If you aren't using a relational collection, this can simply be set to `any`.
-
-If you need to use your generic type later with the added `ID_FIELD` property, wrap it in the `WithID<T>` helper type.
 
 ```ts
 const { createFirestorm } = require("firestorm-db");

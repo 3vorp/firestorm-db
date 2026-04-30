@@ -10,12 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `firestorm.clientVersion` field.
+- `Firestorm.name` instance field, for debugging purposes.
 
 ### Changed
 
 - Multiple Firestorm instances with different configurations at the same time are now possible.
 - Instead of directly importing the Firestorm global, all functions require using the `createFirestorm` function to create a unique instance first.
-- `firestorm.address()` and `firestorm.token()` are now getter/setter fields rather than functions.
+- `firestorm.address()` and `firestorm.token()` are now getter/setter fields rather than functions, and can be set directly from the `createFirestorm` constructor.
 - `ID_FIELD` is now a collection attribute rather than a global attribute, and can be modified per-collection.
 - Removed `Collection.read_raw`, `Collection.write_raw`, and `Firestorm.table` deprecated methods.
 - Add methods now receive the collection instance as a second parameter, since `ID_FIELD` is now attached to the instance rather than globally.

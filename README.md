@@ -19,7 +19,7 @@
 
 # JavaScript Client
 
-The JavaScript [index.js](./src/index.js) file is a wrapper around the backend PHP endpoints, using [Axios](https://www.npmjs.com/package/axios) to handle requests.
+The JavaScript [index.js](./src/index.js) file is a fairly simple wrapper around the backend PHP endpoints, using [Axios](https://www.npmjs.com/package/axios) to handle requests. Any server errors will hence be returned to the client as Axios errors.
 
 ## JavaScript setup
 
@@ -189,6 +189,7 @@ If you're working with multiple collections, it can be easier to initialize them
 // config.php
 <?php
 require_once './classes/JSONDatabase.php';
+
 $database_list = [
     'orders' => new JSONDatabase('orders', true),
     'users' => new JSONDatabase('users', false),
@@ -402,6 +403,8 @@ await firestorm.serverVersion;
 // returns true if these values match and false if they don't
 await firestorm.isCompatibleAddress();
 ```
+
+Whenever updating Firestorm on your server, be sure to update the `$FIRESTORM_VERSION` global in `config.php`.
 
 ## Memory management
 

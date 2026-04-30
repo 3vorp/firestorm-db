@@ -2,16 +2,19 @@
 require_once './utils.php';
 require_once './classes/JSONDatabase.php';
 
+// Server-side version of Firestorm, used for client validation
+// Update this version whenever you update Firestorm!
 $FIRESTORM_VERSION = '2.0.0';
 
 $log_path = 'firestorm.log';
-$database_list = [];
 
 /**
  * Example server-side collection creation:
  * The class has most things set by default, so this is intentionally verbose
  * For adding multiple collections, you can declare them directly in the array constructor.
  */
+
+$database_list = [];
 
 $db = new JSONDatabase;
 // This will be the name of the JSON file

@@ -2,9 +2,11 @@
 require_once './utils.php';
 require_once './classes/JSONDatabase.php';
 
+// Server-side version of Firestorm, used for client validation
+// Update this version whenever you update Firestorm!
 $FIRESTORM_VERSION = '2.0.0';
 
-// whitelist of correct extensions
+// Whitelist of correct extensions
 $authorized_file_extension = ['.txt', '.png', '.jpg', '.jpeg'];
 
 // subfolder of uploads location, must start with dirname($_SERVER['SCRIPT_FILENAME'])

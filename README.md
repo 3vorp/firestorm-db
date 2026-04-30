@@ -385,6 +385,24 @@ The first keys in a Firestorm request will always be the same regardless of its 
 
 The requested PHP file then grabs the `JSONDatabase` instance created in `config.php` using the `collection` key in the request as the `$database_list` key name. From there, the `token` is used to validate the request if needed and the `command` is found and executed.
 
+## Compatibility
+
+Firestorm comes with a few utility methods to ensure the server and client versions are compatible. These are the `clientVersion` and `serverVersion` getters, and the `isCompatibleAddress()` function. Since `serverVersion` needs to make a request, it returns a `Promise<string>` despite looking like a field.
+
+```js
+const { createFirestorm } = require("firestorm-db");
+const firestorm = createFirestorm({ address: "https://example.com/firestorm" });
+
+// returns the npm version of the client code
+firestorm.clientVersion;
+
+// returns the server-side version string
+await firestorm.serverVersion;
+
+// returns true if these values match and false if they don't
+await firestorm.isCompatibleAddress();
+```
+
 ## Memory management
 
 Handling very large collections can cause memory allocation issues:

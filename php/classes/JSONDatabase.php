@@ -1,10 +1,10 @@
 <?php
 
-require_once(__DIR__.'/../utils.php');
-require_once(__DIR__.'/../classes/FileAccess.php');
-require_once(__DIR__.'/../classes/HTTPException.php');
-require_once(__DIR__.'/../classes/read/random.php');
-require_once(__DIR__.'/../classes/read/searchArray.php');
+require_once __DIR__.'/../utils.php';
+require_once __DIR__.'/../classes/FileAccess.php';
+require_once __DIR__.'/../classes/HTTPException.php';
+require_once __DIR__.'/../classes/read/random.php';
+require_once __DIR__.'/../classes/read/searchArray.php';
 
 class JSONDatabase {
     /** Folder to get the JSON file from */
@@ -460,7 +460,7 @@ class JSONDatabase {
             if ($add)
                 $res[$key] = $el_root;
 
-            // only stop early if results will not be ordered randomly 
+            // only stop early if results will not be ordered randomly
             if($has_limit && $random === false && count($res) >= $limit)
                 break;
         }

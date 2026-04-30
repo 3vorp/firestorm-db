@@ -1,11 +1,11 @@
 // @ts-check
 
 import FormData from "form-data";
+import { firestorm } from "./tests.env.mjs";
+import { expect } from "chai";
+
 import { readFileSync, writeFileSync } from "fs";
 import { readFile } from "fs/promises";
-import { firestorm } from "./tests.env.mjs";
-
-import { expect } from "chai";
 import { join } from "path";
 
 describe("File upload, download and delete", () => {
@@ -28,6 +28,7 @@ describe("File upload, download and delete", () => {
 	});
 
 	it("finds an uploaded file and get it with same content", (done) => {
+		/** @param {number} timeout */
 		const timeoutPromise = (timeout) => new Promise((resolve) => setTimeout(resolve, timeout));
 
 		const uploaded = readFileSync(join(process.cwd(), "tests", "lyrics.txt"));

@@ -6,6 +6,7 @@ import type { WriteConfirmation } from "./utils.d.ts";
  * Firestorm file manager
  */
 export declare interface FirestormFiles {
+	/** Root Firestorm instance where the file address and token are based on */
 	readonly instance: Firestorm;
 
 	/**

@@ -1,3 +1,4 @@
+import type { Firestorm } from "./index.d.ts";
 import type { Path, WriteConfirmation } from "./utils.d.ts";
 
 /**
@@ -11,6 +12,9 @@ export interface Collection<T> {
 
 	/** Value for the ID field when searching content */
 	ID_FIELD: string;
+
+	/** Root Firestorm instance where the file address and token are based on */
+	readonly instance: Firestorm;
 
 	/**
 	 * Get the SHA-1 hash of the collection

@@ -2,13 +2,16 @@ const axios = require("axios").default;
 const { __extract_data } = require("./utils.js");
 
 /** Firestorm file manager */
-module.exports = class FirestormFiles {
-	/** Root Firestorm instance */
+class FirestormFiles {
+	/**
+	 * Root Firestorm instance
+	 * @type {Firestorm}
+	 */
 	instance;
 
 	/**
 	 * Create a new Firestorm file manager based on a root instance
-	 * @param {ReturnType<import("./index.js").createFirestorm>} instance
+	 * @param {Firestorm} instance
 	 */
 	constructor(instance) {
 		this.instance = instance;
@@ -23,7 +26,6 @@ module.exports = class FirestormFiles {
 
 	/**
 	 * Get a file by its path
-	 * @memberof firestorm.files
 	 * @template T - Type of file content
 	 * @param {string} path - The wanted file path
 	 * @returns {Promise<T>} File contents
@@ -40,7 +42,6 @@ module.exports = class FirestormFiles {
 
 	/**
 	 * Upload a file
-	 * @memberof firestorm.files
 	 * @param {FormData} form - Form data with path, filename, and file
 	 * @returns {Promise<WriteConfirmation>} Write confirmation
 	 */
@@ -57,7 +58,6 @@ module.exports = class FirestormFiles {
 
 	/**
 	 * Delete a file by its path
-	 * @memberof firestorm.files
 	 * @param {string} path - The file path to delete
 	 * @returns {Promise<WriteConfirmation>} Write confirmation
 	 */
@@ -72,3 +72,5 @@ module.exports = class FirestormFiles {
 		);
 	}
 };
+
+module.exports = FirestormFiles;

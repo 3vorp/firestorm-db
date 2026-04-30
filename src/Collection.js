@@ -48,27 +48,46 @@ const ID_FIELD_NAME = "id";
  */
 
 /**
+ * @callback AddMethod
+ * @template T
+ * @param {T} el - Collection element
+ * @returns {T} - Collection element with added methods
+ */
+
+/**
  * Represents a Firestorm Collection
  * @template T - Type of collection element
  */
-module.exports = class Collection {
-	/** Name of the Firestorm collection */
+class Collection {
+	/**
+	 * Name of the collection
+	 * @type {string}
+	 */
 	collectionName;
 
-	/** Collection add methods */
+	/**
+	 * Additional methods and data to add to the objects
+	 * @type {AddMethod}
+	 */
 	addMethods;
 
-	/** Value for the ID field when searching content */
+	/**
+	 * Value for the ID field when searching content
+	 * @type {string}
+	 */
 	ID_FIELD;
 
-	/** Root Firestorm instance */
+	/**
+	 * Root Firestorm instance
+	 * @type {Firestorm}
+	 */
 	instance;
 
 	/**
 	 * Create a new Firestorm collection instance
-	 * @param {ReturnType<import("./index.js").createFirestorm>} instance - Firestorm instance
-	 * @param {string} name - The name of the collection
-	 * @param {Function} [addMethods] - Additional methods and data to add to the objects
+	 * @param {Firestorm} instance - Root Firestorm instance
+	 * @param {string} name - Name of the collection
+	 * @param {AddMethod} [addMethods] - Additional methods and data to add to the objects
 	 */
 	constructor(instance, name, addMethods = (el) => el) {
 		this.instance = instance;
@@ -228,7 +247,7 @@ module.exports = class Collection {
 	/**
 	 * Search through the collection
 	 * @param {SearchOption[]} options - Array of search options
-	 * @param {(boolean|number|SearchResultOptions)?} [resultOptions] - Search result options
+	 * @param {(boolean | number | SearchResultOptions)?} [resultOptions] - Search result options
 	 * @returns {Promise<T[]>} The found elements
 	 */
 	async search(options, resultOptions = undefined) {
@@ -313,16 +332,6 @@ module.exports = class Collection {
 			data[key][this.ID_FIELD] = key;
 		});
 		return this.__add_methods(data);
-	}
-
-	/**
-	 * Read the entire collection
-	 * - ID values are injected for easier iteration, so this may be different from {@link sha1}
-	 * @deprecated Use {@link readRaw} instead
-	 * @returns {Promise<Record<string, T>>} The entire collection
-	 */
-	read_raw() {
-		return this.readRaw();
 	}
 
 	/**
@@ -413,17 +422,6 @@ module.exports = class Collection {
 	}
 
 	/**
-	 * Set the entire content of the collection.
-	 * - Only use this method if you know what you are doing!
-	 * @deprecated Use {@link writeRaw} instead
-	 * @param {Record<string, T>} value - The value to write
-	 * @returns {Promise<WriteConfirmation>} Write confirmation
-	 */
-	write_raw(value) {
-		return this.writeRaw(value);
-	}
-
-	/**
 	 * Append a value to the collection
 	 * - Only works if autoKey is enabled server-side
 	 * @param {T} value - The value (without methods) to add
@@ -511,4 +509,6 @@ module.exports = class Collection {
 		const data = this.__write_data("editFieldBulk", options, undefined);
 		return __extract_data(axios.post(this.__write_address, data));
 	}
-};
+}
+
+module.exports = Collection;

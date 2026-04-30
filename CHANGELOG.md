@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Added
+
+- `firestorm.clientVersion` field.
+
+### Changed
+
+- Multiple Firestorm instances with different configurations at the same time are now possible.
+- Instead of directly importing the Firestorm global, all functions require using the `createFirestorm` function to create a unique instance first.
+- `firestorm.address()` and `firestorm.token()` are now getter/setter fields rather than functions.
+- `ID_FIELD` is now a collection attribute rather than a global attribute, and can be modified per-collection.
+- Removed `Collection.read_raw`, `Collection.write_raw`, and `Firestorm.table` deprecated methods.
+
 ## [1.14.0] - 2026-04-06
 
 ### Added

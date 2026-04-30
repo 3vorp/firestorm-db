@@ -1,5 +1,5 @@
 const Collection = require("./collection.js");
-const FirestormFiles = require("./FirestormFiles.js");
+const FirestormFiles = require("./files.js");
 
 /**
  * @typedef FirestormCreationOption
@@ -9,19 +9,20 @@ const FirestormFiles = require("./FirestormFiles.js");
  */
 
 /**
- * A unique Firestorm instance, representing a single Firestorm server and its collections
+ * Represents a Firestorm-powered server and its collections, tokens, and setup
  */
 class Firestorm {
 	/** @ignore */
 	_name;
-
 	/** @ignore */
 	_address;
-
 	/** @ignore */
 	_token;
 
-	/** Firestorm file manager */
+	/**
+	 * Firestorm file manager
+	 * @type {FirestormFiles}
+	 */
 	files;
 
 	/**
@@ -47,35 +48,40 @@ class Firestorm {
 		return new Collection(this, name, addMethods);
 	}
 
+	// jsdoc has a really hard time dealing with getters/setters so this makes it look decent
+
+	/** @type {string} */
 	get name() {
 		return this._name || this.address;
 	}
 
+	/** @ignore */
 	set name(newValue) {
 		this._name = String(newValue);
 	}
 
+	/** @type {string} */
 	get token() {
 		return this._token;
 	}
 
+	/** @ignore */
 	set token(newValue) {
 		this._token = newValue;
 	}
 
+	/** @type {string} */
 	get address() {
 		return this._address;
 	}
 
+	/** @ignore */
 	set address(newValue) {
 		if (newValue && !newValue.endsWith("/")) newValue += "/";
 		this._address = newValue;
 	}
 }
 
-/**
- * @namespace firestorm
- */
 module.exports = {
 	/**
 	 * Create a new Firestorm instance
@@ -83,8 +89,6 @@ module.exports = {
 	 * @param {FirestormCreationOption} [params] - Firestorm instance name, server address, and write token
 	 * @returns {Firestorm} Firestorm instance
 	 */
-	createFirestorm(params = undefined) {
-		return new Firestorm(params);
-	},
+	createFirestorm: (params = {}) => new Firestorm(params),
 	clientVersion: require("../package.json").version,
 };

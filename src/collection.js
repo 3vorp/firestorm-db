@@ -326,7 +326,7 @@ class Collection {
 	 * @returns {Promise<Record<string, T>>} The entire collection
 	 */
 	async readRaw(original = false) {
-		const data = await this.__get_request("read_raw");
+		const data = await this.__get_request("readRaw");
 		if (original) return this.__add_methods(data);
 		// preserve as object
 		Object.keys(data).forEach((key) => {
@@ -419,7 +419,7 @@ class Collection {
 	async writeRaw(value) {
 		if (value === undefined || value === null)
 			throw new TypeError("writeRaw value cannot be undefined or null");
-		return __extract_data(axios.post(this.__write_address, this.__write_data("write_raw", value)));
+		return __extract_data(axios.post(this.__write_address, this.__write_data("writeRaw", value)));
 	}
 
 	/**

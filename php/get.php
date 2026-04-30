@@ -28,9 +28,6 @@ if (!$collection)
 if (file_exists('./config.php') == false)
     http_error(501, 'Developer didn\'t implement a config.php file');
 
-if (!isset($database_list))
-    http_error(500, 'Developer forgot to create $database_list');
-
 // import db config
 require_once './config.php';
 
@@ -51,7 +48,7 @@ try {
         http_error(400, 'No command provided');
 
     $available_commands = [
-        'read_raw',
+        'readRaw',
         'get',
         'search',
         'searchKeys',
@@ -69,8 +66,8 @@ try {
             $res = $db->sha1();
             http_response($res);
             break;
-        case 'read_raw':
-            $res = $db->read_raw();
+        case 'readRaw':
+            $res = $db->readRaw();
             $res = $res->content;
             http_response($res);
             break;

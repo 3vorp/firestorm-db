@@ -11,11 +11,8 @@ if ($method === 'GET') {
     http_error(400, "Incorrect request type, expected POST, not $method");
 }
 
-$input = file_get_contents('php://input');
-if ($input === false)
-    http_error(400, 'No JSON body provided');
+$inputJSON = json_decode(file_get_contents('php://input'), true);
 
-$inputJSON = json_decode($input, true);
 if (!$inputJSON)
     http_error(400, 'No JSON body provided');
 
@@ -29,10 +26,7 @@ if (file_exists('./tokens.php') == false)
 // add tokens
 require_once './tokens.php';
 
-if (!isset($database_list))
-    http_error(500, 'Developer forgot to create $database_list');
-
-if (!isset($db_tokens))
+if (!$db_tokens)
     http_error(400, 'Developer is dumb and forgot to create tokens');
 
 // verifying token
@@ -63,7 +57,7 @@ try {
         http_error(400, 'No command provided');
 
     $available_commands = [
-        'write_raw',
+        'writeRaw',
         'add',
         'addBulk',
         'remove',
@@ -84,8 +78,8 @@ try {
         http_error(400, "No $valueKeyName provided");
 
     switch ($command) {
-        case 'write_raw':
-            $db->write_raw($value);
+        case 'writeRaw':
+            $db->writeRaw($value);
             http_success("Successful $command command");
             break;
         case 'add':

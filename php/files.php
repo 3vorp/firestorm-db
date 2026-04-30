@@ -7,7 +7,7 @@ error_reporting(E_ALL - E_NOTICE);
 
 require_once './config.php';
 
-if (!isset($STORAGE_LOCATION))
+if (!$STORAGE_LOCATION)
     http_error(501, 'Developer forgot the $STORAGE_LOCATION');
 
 // import useful functions
@@ -31,10 +31,10 @@ if ($method === 'POST') {
     // add tokens
     require_once './tokens.php';
 
-    if (!isset($db_tokens))
+    if (!$db_tokens)
         http_error(501, 'Developer is dumb and forgot to create tokens');
 
-    if (!isset($authorized_file_extension))
+    if (!$authorized_file_extension)
         http_error(501, 'Developer is dumb and forgot to create $authorized_file_extension');
 
     $token = p('token');
@@ -102,9 +102,8 @@ if ($method === 'POST') {
     ];
 
     $errorCode = $_FILES['file']['error'] ?? UPLOAD_ERR_OK;
-    if ($errorCode !== UPLOAD_ERR_OK) {
+    if ($errorCode !== UPLOAD_ERR_OK)
         http_error(500, $errorMessages[$errorCode] ?? "Unknown error.");
-    }
 
     $tmpName = $_FILES['file']['tmp_name'];
 
@@ -179,15 +178,18 @@ if ($method === 'POST') {
     // add tokens
     require_once './tokens.php';
 
-    if (!isset($db_tokens))
+    if (!$db_tokens)
         http_error(501, 'Developer is dumb and forgot to create tokens');
 
     $data = json_decode(file_get_contents('php://input'), true);
     if ($data === false)
         http_error(400, 'Could not parse input data');
 
-    if (!array_key_exists('token', $data))
-        http_error(400, 'No token provided');
+    try {
+        $token = $data['token'];
+    } catch (Exception $e) {
+        http_error(400, 'Failed parsing input data');
+    }
 
     // verifying token
     if ($token === false)
@@ -195,11 +197,8 @@ if ($method === 'POST') {
     if (!in_array($token, $db_tokens))
         http_error(403, 'Invalid token');
 
-    if (!array_key_exists('path', $data))
-        http_error(400, 'No path provided');
-
     $path = trim($data['path']);
-    if (strlen($path) === 0)
+    if ($path === false)
         http_error(400, 'No path provided');
 
     // check path lower than me

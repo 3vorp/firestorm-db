@@ -1,10 +1,10 @@
 <?php
 
-require_once __DIR__.'/../utils.php';
-require_once __DIR__.'/../classes/FileAccess.php';
-require_once __DIR__.'/../classes/HTTPException.php';
-require_once __DIR__.'/../classes/read/random.php';
-require_once __DIR__.'/../classes/read/searchArray.php';
+require_once __DIR__ . '/../utils.php';
+require_once __DIR__ . '/../classes/FileAccess.php';
+require_once __DIR__ . '/../classes/HTTPException.php';
+require_once __DIR__ . '/../classes/read/random.php';
+require_once __DIR__ . '/../classes/read/searchArray.php';
 
 class JSONDatabase {
     /** Folder to get the JSON file from */
@@ -34,13 +34,13 @@ class JSONDatabase {
         return $this->folderPath . $this->fileName . $this->fileExt;
     }
 
-    public function write_raw($content) {
+    public function writeRaw($content) {
         $content_type = gettype($content);
         $incorrect_types = ['integer', 'double', 'string', 'boolean'];
 
         // content must not be primitive
         if (in_array($content_type, $incorrect_types)) {
-            throw new HTTPException("write_raw value cannot be a $content_type", 400);
+            throw new HTTPException("writeRaw value cannot be a $content_type", 400);
         }
 
         // value must not be a sequential array with values inside [1, 2, 3]
@@ -49,7 +49,7 @@ class JSONDatabase {
             foreach ($content as $item) {
                 $item_type = gettype($item);
                 if (in_array($item_type, $incorrect_types)) {
-                    throw new HTTPException("write_raw item cannot be a $item_type", 400);
+                    throw new HTTPException("writeRaw item cannot be a $item_type", 400);
                 }
             }
         }
@@ -63,7 +63,7 @@ class JSONDatabase {
             // we don't accept primitive keys as value
             $item_type = gettype($item);
             if (in_array($item_type, $incorrect_types)) {
-                throw new HTTPException("write_raw item with key $key cannot be a $item_type", 400);
+                throw new HTTPException("writeRaw item with key $key cannot be a $item_type", 400);
             }
 
             // we accept associative array as items because they may have an integer key
@@ -84,17 +84,17 @@ class JSONDatabase {
     }
 
     public function sha1() {
-        $obj = $this->read_raw();
+        $obj = $this->readRaw();
         return sha1($obj->content);  // @phpstan-ignore argument.type
     }
 
-    public function read_raw($waitLock = false): FileObject {
+    public function readRaw($waitLock = false): FileObject {
         // fall back to empty array if failed
         return FileAccess::read($this->fullPath(), $waitLock, json_encode([]));
     }
 
     public function read($waitLock = false) {
-        $res = $this->read_raw($waitLock);
+        $res = $this->readRaw($waitLock);
         $res->content = json_decode($res->content, true);  // @phpstan-ignore argument.type
         return $res;
     }
@@ -128,7 +128,7 @@ class JSONDatabase {
             throw new HTTPException('Value cannot be a sequential array', 400);
 
         $encoded_value = json_encode($value);
-        if($encoded_value === false)
+        if ($encoded_value === false)
             throw new HTTPException('Failed to encode value', 400);
 
         $key = strval($key);
@@ -147,11 +147,11 @@ class JSONDatabase {
             throw new HTTPException('Incorrect keys type');
 
         $encoded_values = json_encode($values);
-        if($encoded_values === false)
+        if ($encoded_values === false)
             throw new HTTPException('Failed to encode values', 400);
 
         $encoded_keys = json_encode($keys);
-        if($encoded_keys === false)
+        if ($encoded_keys === false)
             throw new HTTPException('Failed to encode keys', 400);
 
 
@@ -405,9 +405,9 @@ class JSONDatabase {
 
     public function search($conditions, $random = false, $limit = false) {
         $has_limit = false;
-        if(gettype($limit) === 'integer' && $limit > 0)
+        if (gettype($limit) === 'integer' && $limit > 0)
             $has_limit = true;
-        else if($limit !== false)
+        else if ($limit !== false)
             throw new HTTPException('search option limit must be a positive integer');
 
         $obj = $this->read();
@@ -461,7 +461,7 @@ class JSONDatabase {
                 $res[$key] = $el_root;
 
             // only stop early if results will not be ordered randomly
-            if($has_limit && $random === false && count($res) >= $limit)
+            if ($has_limit && $random === false && count($res) >= $limit)
                 break;
         }
 

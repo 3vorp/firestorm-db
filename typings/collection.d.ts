@@ -59,14 +59,6 @@ export interface Collection<T> {
 	): Promise<Record<string, O extends true ? WithoutID<T> : T>>;
 
 	/**
-	 * Read the entire collection
-	 * - ID values are injected for easier iteration, so this may be different from {@link sha1}
-	 * @deprecated Use {@link readRaw} instead
-	 * @returns The entire collection
-	 */
-	read_raw(): Promise<Record<string, T>>;
-
-	/**
 	 * Get only selected fields from the collection
 	 * - Essentially an upgraded version of {@link readRaw}
 	 * @param option - The fields you want to select
@@ -101,15 +93,6 @@ export interface Collection<T> {
 	 * @returns Write confirmation
 	 */
 	writeRaw(value: Record<string, Addable<T>>): Promise<WriteConfirmation>;
-
-	/**
-	 * Set the entire content of the collection.
-	 * - Only use this method if you know what you are doing!
-	 * @deprecated Use {@link writeRaw} instead
-	 * @param value - The value to write
-	 * @returns Write confirmation
-	 */
-	write_raw(value: Record<string, Addable<T>>): Promise<WriteConfirmation>;
 
 	/**
 	 * Append a value to the collection

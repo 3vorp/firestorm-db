@@ -42,4 +42,10 @@ describe("Wrapper information", () => {
 	it("server and client versions match", async () => {
 		expect(await firestorm.isCompatibleAddress()).to.be.true;
 	});
+
+	it("getting the server version requires token", (done) => {
+		// no token
+		const tmp = createFirestorm({ address: ADDRESS });
+		tmp.serverVersion.then(() => done("Expected to fail")).catch(() => done());
+	});
 });

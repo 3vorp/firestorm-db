@@ -1,5 +1,7 @@
 // Stress test for firestorm-db TypeScript types.
-import firestorm from "..";
+import { createFirestorm } from "..";
+
+const firestorm = createFirestorm();
 
 /**
  * I. CREATE A COLLECTION
@@ -7,7 +9,6 @@ import firestorm from "..";
 
 // let's declare an interface for our collection
 interface User {
-	[base.ID_FIELD]: string;
 	name: string;
 }
 
@@ -36,7 +37,6 @@ usersWithMethods.select({ fields: ["name", "family"] }); // getNameAsLowerCase n
 
 // 1. search through a collection
 interface User {
-	[base.ID_FIELD]: string;
 	name: string;
 	age: number;
 	sex: "female" | "male" | "other";
@@ -63,20 +63,21 @@ users.search([
 
 // 2. collections can interface with each other
 interface Family {
-	[base.ID_FIELD]: string;
 	parents: User[];
 	children: User[];
 	getDad(): Promise<User>;
 	getMom(): Promise<User>;
 }
 
-firestorm.collection<Family>("families", (el) => {
+firestorm.collection<Family>("families", (el, col) => {
 	el.getDad = (): Promise<User> =>
-		users.search([
-			// === family id
-			{ field: "family", criteria: "==", value: el[base.ID_FIELD] },
-			{ field: "sex", criteria: "==", value: "male" },
-		])[0];
+		users
+			.search([
+				// === family id
+				{ field: "family", criteria: "==", value: el[col.ID_FIELD] },
+				{ field: "sex", criteria: "==", value: "male" },
+			])
+			.then((res) => res[0]);
 
 	return el;
 });

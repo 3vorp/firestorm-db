@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `firestorm.address()` and `firestorm.token()` are now getter/setter fields rather than functions.
 - `ID_FIELD` is now a collection attribute rather than a global attribute, and can be modified per-collection.
 - Removed `Collection.read_raw`, `Collection.write_raw`, and `Firestorm.table` deprecated methods.
+- Add methods now receive the collection instance as a second parameter, since `ID_FIELD` is now attached to the instance rather than globally.
+- Added `WithID` helper type, which adds the ID field to the input type.
 
 ## [1.14.0] - 2026-04-06
 

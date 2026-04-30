@@ -1,7 +1,8 @@
 <?php
-
 require_once './utils.php';
 require_once './classes/JSONDatabase.php';
+
+$FIRESTORM_VERSION = '2.0.0';
 
 // whitelist of correct extensions
 $authorized_file_extension = ['.txt', '.png', '.jpg', '.jpeg'];

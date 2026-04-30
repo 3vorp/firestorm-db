@@ -1,3 +1,4 @@
+const axios = require("axios").default;
 const Collection = require("./collection.js");
 const FirestormFiles = require("./files.js");
 
@@ -80,6 +81,39 @@ class Firestorm {
 		if (newValue && !newValue.endsWith("/")) newValue += "/";
 		this._address = newValue;
 	}
+
+	/**
+	 * Get the current version of Firestorm
+	 * @type {string}
+	 */
+	get clientVersion() {
+		return require("../package.json").version;
+	}
+
+	/**
+	 * Get the version of Firestorm used on the provided server
+	 * @type {Promise<string>}
+	 */
+	get serverVersion() {
+		if (!this.address)
+			throw new Error(`Address for Firestorm instance "${this.instance.name}" was not configured`);
+
+		return axios
+			.get(`${this.address}version.php`, {
+				data: {
+					token: this.token,
+				},
+			})
+			.then((res) => res.data);
+	}
+
+	/**
+	 * Check whether the server-side Firestorm version is compatible with the client
+	 * @returns {Promise<boolean>} - Whether the versions match
+	 */
+	async isCompatibleAddress() {
+		return (await this.serverVersion) === this.clientVersion;
+	}
 }
 
 /**
@@ -89,9 +123,3 @@ class Firestorm {
  * @returns {Firestorm} Firestorm instance
  */
 exports.createFirestorm = (params = {}) => new Firestorm(params);
-
-/**
- * Get the current version of Firestorm
- * @type {string}
- */
-exports.clientVersion = require("../package.json").version;

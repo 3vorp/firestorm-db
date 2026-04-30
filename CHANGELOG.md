@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `firestorm.clientVersion` field.
+- `Firestorm.clientVersion` field.
+- `Firestorm.serverVersion` getter (returns a `Promise<string>`).
 - `Firestorm.name` instance field, for debugging purposes.
 
 ### Changed

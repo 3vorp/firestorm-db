@@ -16,7 +16,7 @@ describe("Wrapper information", () => {
 	it("can use constructor address", () => {
 		firestorm.address = ADDRESS;
 		const tmp = createFirestorm({ address: ADDRESS });
-		expect(firestorm.address).to.equal(tmp.address);
+		expect(firestorm.address).to.equal(tmp.address, "Address was not set correctly");
 	});
 
 	it("binds usable token", () => {
@@ -29,6 +29,17 @@ describe("Wrapper information", () => {
 	it("can use constructor token", () => {
 		firestorm.token = TOKEN;
 		const tmp = createFirestorm({ token: TOKEN });
-		expect(firestorm.token).to.equal(tmp.token);
+		expect(firestorm.token).to.equal(tmp.token, "Token was not set correctly");
+	});
+
+	it("gets the version field correctly", async () => {
+		firestorm.token = TOKEN;
+
+		const version = await firestorm.serverVersion;
+		expect(version).to.match(/\d+\.\d+\.\d+/, "Version did not match expected schema");
+	});
+
+	it("server and client versions match", async () => {
+		expect(await firestorm.isCompatibleAddress()).to.be.true;
 	});
 });

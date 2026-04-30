@@ -7,7 +7,7 @@ error_reporting(E_ALL - E_NOTICE);
 
 require_once './config.php';
 
-if (!$STORAGE_LOCATION)
+if (!isset($STORAGE_LOCATION))
     http_error(501, 'Developer forgot the $STORAGE_LOCATION');
 
 // import useful functions
@@ -31,10 +31,10 @@ if ($method === 'POST') {
     // add tokens
     require_once './tokens.php';
 
-    if (!$db_tokens)
+    if (!isset($db_tokens))
         http_error(501, 'Developer is dumb and forgot to create tokens');
 
-    if (!$authorized_file_extension)
+    if (!isset($authorized_file_extension))
         http_error(501, 'Developer is dumb and forgot to create $authorized_file_extension');
 
     $token = p('token');
@@ -179,7 +179,7 @@ if ($method === 'POST') {
     // add tokens
     require_once './tokens.php';
 
-    if (!$db_tokens)
+    if (!isset($db_tokens))
         http_error(501, 'Developer is dumb and forgot to create tokens');
 
     $data = json_decode(file_get_contents('php://input'), true);

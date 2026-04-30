@@ -28,6 +28,9 @@ if (!$collection)
 if (file_exists('./config.php') == false)
     http_error(501, 'Developer didn\'t implement a config.php file');
 
+if (!isset($database_list))
+    http_error(500, 'Developer forgot to create $database_list');
+
 // import db config
 require_once './config.php';
 

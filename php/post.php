@@ -29,7 +29,10 @@ if (file_exists('./tokens.php') == false)
 // add tokens
 require_once './tokens.php';
 
-if (!$db_tokens)
+if (!isset($database_list))
+    http_error(500, 'Developer forgot to create $database_list');
+
+if (!isset($db_tokens))
     http_error(400, 'Developer is dumb and forgot to create tokens');
 
 // verifying token

@@ -115,7 +115,12 @@ class Firestorm {
 	 * @returns {Promise<boolean>} - Whether the versions match
 	 */
 	async isCompatibleAddress() {
-		return (await this.serverVersion) === this.clientVersion;
+		const serverVersion = await this.serverVersion;
+		const splitServer = serverVersion.split(".");
+		const splitClient = this.clientVersion.split(".");
+
+		// patch version keeps server compatibility
+		return splitServer[0] === splitClient[0] && splitServer[1] === splitClient[1];
 	}
 }
 

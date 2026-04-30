@@ -3,7 +3,7 @@
 import crypto from "crypto";
 import { expect } from "chai";
 
-import { base, content, resetDatabaseContent, ADDRESS, firestorm } from "./tests.env.mjs";
+import { base, content, resetDatabaseContent, firestorm, ADDRESS } from "./tests.env.mjs";
 import { request } from "http";
 
 describe("GET operations", () => {

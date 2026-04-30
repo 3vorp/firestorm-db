@@ -82,13 +82,16 @@ class Firestorm {
 	}
 }
 
-module.exports = {
-	/**
-	 * Create a new Firestorm instance
-	 * - All parameters are optional and can be edited using the name, address, and token fields
-	 * @param {FirestormCreationOption} [params] - Firestorm instance name, server address, and write token
-	 * @returns {Firestorm} Firestorm instance
-	 */
-	createFirestorm: (params = {}) => new Firestorm(params),
-	clientVersion: require("../package.json").version,
-};
+/**
+ * Create a new Firestorm instance
+ * - All parameters are optional and can be edited using the name, address, and token fields
+ * @param {FirestormCreationOption} [params] - Firestorm instance name, server address, and write token
+ * @returns {Firestorm} Firestorm instance
+ */
+exports.createFirestorm = (params = {}) => new Firestorm(params);
+
+/**
+ * Get the current version of Firestorm
+ * @type {string}
+ */
+exports.clientVersion = require("../package.json").version;

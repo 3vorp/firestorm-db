@@ -71,6 +71,6 @@ class FirestormFiles {
 			}),
 		);
 	}
-};
+}
 
 module.exports = FirestormFiles;

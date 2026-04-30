@@ -470,10 +470,8 @@ const hello = johnDoe.hello(); // type: string
 await userCollection.add({
     name: "Mary Doe",
     // Error: 'hello' does not exist in type 'Addable<User>'.
-    hello() {
-        return "Mary Doe says hello!"
-    }
-})
+    hello: () => "Mary Doe says hello!",
+});
 ```
 
 ## Additional types
@@ -481,9 +479,17 @@ await userCollection.add({
 Additional types exist for search criteria options, write method return types, configuration methods, the file handler, etc.
 
 ```ts
-import firestorm from "firestorm-db";
-const address = firestorm.address("ADDRESS_VALUE");
-// type: string
+const searchOptions: SearchOption<User>[] = [
+    {
+        field: "name",
+        criteria: "==",
+        value: "John Doe",
+    },
+];
+// type: SearchOption<User>[]
+
+userCollection.search(searchOptions, { limit: 300 });
+// type: User[]
 
 const deleteConfirmation = await firestorm.files.delete("/quote.txt");
 // type: firestorm.WriteConfirmation

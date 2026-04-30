@@ -1,6 +1,8 @@
 const axios = require("axios").default;
 const { __extract_data } = require("./utils.js");
 
+const ID_FIELD_NAME = "id";
+
 /**
  * @typedef {Object} SearchOption
  * @property {string} field - The field to be searched for
@@ -57,7 +59,7 @@ module.exports = class Collection {
 	addMethods;
 
 	/** Value for the ID field when searching content */
-	ID_FIELD = ID_FIELD_NAME;
+	ID_FIELD;
 
 	/** Root Firestorm instance */
 	instance;
@@ -75,6 +77,7 @@ module.exports = class Collection {
 			throw new TypeError("Collection add methods must be a function");
 		this.collectionName = name;
 		this.addMethods = addMethods;
+		this.ID_FIELD = ID_FIELD_NAME;
 	}
 
 	/**
@@ -130,9 +133,7 @@ module.exports = class Collection {
 			command: command,
 			...data,
 		};
-		const request = IS_NODE
-			? axios.get(this.__read_address, { data: obj })
-			: axios.post(this.__read_address, obj);
+		const request = axios.get(this.__read_address, { data: obj });
 		const res = await __extract_data(request);
 		// reject php error strings if enforcing return type
 		if (objectLike && typeof res !== "object") throw res;

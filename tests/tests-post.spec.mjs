@@ -2,15 +2,21 @@
 
 import { expect } from "chai";
 
-import firestorm from "../src/index.js";
-import { base, content, houseCollection, resetDatabaseContent, TOKEN } from "./tests.env.mjs";
+import {
+	base,
+	content,
+	houseCollection,
+	resetDatabaseContent,
+	firestorm,
+	TOKEN,
+} from "./tests.env.mjs";
 
 let tmp;
 
 describe("POST operations", () => {
 	describe("writeRaw operations", () => {
 		it("Rejects when incorrect token", (done) => {
-			firestorm.token("LetsGoToTheMall");
+			firestorm.token = "LetsGoToTheMall";
 
 			base
 				.writeRaw({})
@@ -22,7 +28,9 @@ describe("POST operations", () => {
 					}
 					done(new Error("Should return 403"));
 				})
-				.finally(() => firestorm.token(TOKEN));
+				.finally(() => {
+					firestorm.token = TOKEN;
+				});
 		});
 
 		describe("You must give a correct value", () => {
@@ -258,7 +266,7 @@ describe("POST operations", () => {
 						const idsGenerated = results[0];
 						// modify results and add ID
 						inValue.map((el, index) => {
-							el[firestorm.ID_FIELD] = idsGenerated[index];
+							el[base.ID_FIELD] = idsGenerated[index];
 							return el;
 						});
 
@@ -471,7 +479,7 @@ describe("POST operations", () => {
 					return base.get(42);
 				})
 				.then((expected) => {
-					tmp[firestorm.ID_FIELD] = "42";
+					tmp[base.ID_FIELD] = "42";
 					expect(expected).to.deep.equals(tmp);
 					done();
 				})
@@ -559,7 +567,7 @@ describe("POST operations", () => {
 					return base.get("6");
 				})
 				.then((found) => {
-					tmp[firestorm.ID_FIELD] = "6"; // add id field
+					tmp[base.ID_FIELD] = "6"; // add id field
 
 					expect(tmp).to.deep.equal(found);
 					done();

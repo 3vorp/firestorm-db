@@ -2,34 +2,33 @@
 
 import { expect } from "chai";
 
-import firestorm from "../src/index.js";
-import { ADDRESS, TOKEN } from "./tests.env.mjs";
+import { firestorm, ADDRESS, TOKEN } from "./tests.env.mjs";
+import { createFirestorm } from "../src/index.js";
 
 describe("Wrapper information", () => {
-	it("throws if no address yet", () => {
-		expect(firestorm.address).to.throw(Error, "Firestorm address was not configured");
+	it("binds usable address", () => {
+		firestorm.address = ADDRESS;
+
+		const actual = firestorm.address;
+		expect(actual).to.equal(ADDRESS, "Incorrect address bind");
 	});
 
-	it("binds usable address", function () {
-		firestorm.address(ADDRESS);
-
-		const actual = firestorm.address();
-		expect(actual).to.equal(ADDRESS + "get.php", "Incorrect address bind");
-	});
-
-	it("throws if no token yet", (done) => {
-		try {
-			let res = firestorm.token();
-			done("token get operation should fail, got " + res);
-		} catch (e) {
-			done();
-		}
+	it("can use constructor address", () => {
+		firestorm.address = ADDRESS;
+		const tmp = createFirestorm({ address: ADDRESS });
+		expect(firestorm.address).to.equal(tmp.address);
 	});
 
 	it("binds usable token", () => {
-		firestorm.token(TOKEN);
+		firestorm.token = TOKEN;
 
-		const actual = firestorm.token();
+		const actual = firestorm.token;
 		expect(actual).to.equal(TOKEN, "Incorrect token bind");
+	});
+
+	it("can use constructor token", () => {
+		firestorm.token = TOKEN;
+		const tmp = createFirestorm({ token: TOKEN });
+		expect(firestorm.token).to.equal(tmp.token);
 	});
 });

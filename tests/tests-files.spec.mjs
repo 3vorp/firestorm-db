@@ -3,11 +3,10 @@
 import FormData from "form-data";
 import { readFileSync, writeFileSync } from "fs";
 import { readFile } from "fs/promises";
+import { firestorm } from "./tests.env.mjs";
 
 import { expect } from "chai";
 import { join } from "path";
-
-import firestorm from "../src/index.js";
 
 describe("File upload, download and delete", () => {
 	it("cannot find an unknown file", (done) => {

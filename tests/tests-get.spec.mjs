@@ -3,8 +3,7 @@
 import crypto from "crypto";
 import { expect } from "chai";
 
-import firestorm from "../src/index.js";
-import { base, content, resetDatabaseContent, ADDRESS, TOKEN } from "./tests.env.mjs";
+import { base, content, resetDatabaseContent, ADDRESS, firestorm } from "./tests.env.mjs";
 import { request } from "http";
 
 describe("GET operations", () => {
@@ -40,9 +39,9 @@ describe("GET operations", () => {
 				.readRaw()
 				.then((res) => {
 					Object.entries(res).forEach(([k, v]) =>
-						expect(v).to.have.property(firestorm.ID_FIELD, k, "Missing ID field"),
+						expect(v).to.have.property(base.ID_FIELD, k, "Missing ID field"),
 					);
-					Object.keys(res).forEach((key) => delete res[key][firestorm.ID_FIELD]);
+					Object.keys(res).forEach((key) => delete res[key][base.ID_FIELD]);
 					expect(res).deep.equals(content, "Content different");
 					done();
 				})
@@ -70,7 +69,7 @@ describe("GET operations", () => {
 			base
 				.get("0")
 				.then((res) => {
-					delete res[firestorm.ID_FIELD]; // normal, get gives an id field
+					delete res[base.ID_FIELD]; // normal, get gives an id field
 					expect(res).deep.equals(content[0], "Content different");
 					done();
 				})
@@ -81,7 +80,7 @@ describe("GET operations", () => {
 			base
 				.get(0)
 				.then((res) => {
-					delete res[firestorm.ID_FIELD]; // normal, get gives an id field
+					delete res[base.ID_FIELD]; // normal, get gives an id field
 					expect(res).deep.equals(content[0], "Content different");
 					done();
 				})
@@ -127,7 +126,7 @@ describe("GET operations", () => {
 				.searchKeys([0, 2])
 				.then((res) => {
 					res = res.map((el) => {
-						delete el[firestorm.ID_FIELD];
+						delete el[base.ID_FIELD];
 						return el;
 					});
 					const expected = [content[0], content[2]];
@@ -211,7 +210,7 @@ describe("GET operations", () => {
 					.then((res) => {
 						expect(res).to.be.an("array", "Search result must be an array");
 						expect(res).to.have.lengthOf(idsFound.length, "Found result has incorrect length");
-						expect(res.map((el) => el[firestorm.ID_FIELD])).to.deep.equal(
+						expect(res.map((el) => el[base.ID_FIELD])).to.deep.equal(
 							idsFound,
 							"Incorrect result search",
 						);
@@ -253,7 +252,7 @@ describe("GET operations", () => {
 					])
 					.then((res) => {
 						expect(res).not.to.deep.equal([]);
-						delete res[0][firestorm.ID_FIELD];
+						delete res[0][base.ID_FIELD];
 						expect(res).to.deep.equal([
 							{
 								name: "Joy Harper",
@@ -362,7 +361,7 @@ describe("GET operations", () => {
 				.then((res) => {
 					expect(res).to.be.an("array", "Search result must be an array");
 					expect(res).to.have.lengthOf(1, "Should return exactly 1 result due to limit");
-					expect(res[0][firestorm.ID_FIELD]).to.be.oneOf(
+					expect(res[0][base.ID_FIELD]).to.be.oneOf(
 						["0", "1", "2"],
 						"Should be one of the matching IDs",
 					);
@@ -548,7 +547,7 @@ describe("GET operations", () => {
 						});
 					});
 					Object.keys(selectResult).forEach((k) => {
-						delete selectResult[k][firestorm.ID_FIELD];
+						delete selectResult[k][base.ID_FIELD];
 					});
 
 					expect(selectResult).to.be.deep.equal(raw, `contents are different`);

@@ -22,17 +22,18 @@ class Firestorm {
 	_token;
 
 	/** Firestorm file manager */
-	files = new FirestormFiles();
+	files;
 
 	/**
 	 * Create a new Firestorm instance
 	 * - All parameters are optional and can be edited using the name, address, and token fields
-	 * @param {FirestormCreationOption} [parameters] - Firestorm instance name, server address, and write token
+	 * @param {FirestormCreationOption} [params] - Firestorm instance name, server address, and write token
 	 */
 	constructor({ name, address, token } = {}) {
 		this.name = name;
 		this.address = address;
 		this.token = token;
+		this.files = new FirestormFiles(this);
 	}
 
 	/**
@@ -51,7 +52,7 @@ class Firestorm {
 	}
 
 	set name(newValue) {
-		this.name = String(newValue);
+		this._name = String(newValue);
 	}
 
 	get token() {
@@ -67,7 +68,7 @@ class Firestorm {
 	}
 
 	set address(newValue) {
-		if (!newValue.endsWith("/")) newValue += "/";
+		if (newValue && !newValue.endsWith("/")) newValue += "/";
 		this._address = newValue;
 	}
 }
@@ -79,10 +80,10 @@ module.exports = {
 	/**
 	 * Create a new Firestorm instance
 	 * - All parameters are optional and can be edited using the name, address, and token fields
-	 * @param {FirestormCreationOption} [parameters] - Firestorm instance name, server address, and write token
+	 * @param {FirestormCreationOption} [params] - Firestorm instance name, server address, and write token
 	 * @returns {Firestorm} Firestorm instance
 	 */
-	createFirestorm(params) {
+	createFirestorm(params = undefined) {
 		return new Firestorm(params);
 	},
 	clientVersion: require("../package.json").version,

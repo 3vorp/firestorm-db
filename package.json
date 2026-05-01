@@ -18,7 +18,7 @@
     "types:gen": "npx tsc",
     "lint:write": "prettier \"{,!(node_modules)/**/}*.{cjs,mjs,js,ts}\" --config .prettierrc --write",
     "lint:check": "prettier \"{,!(node_modules)/**/}*.{cjs,mjs,js,ts}\" --config .prettierrc --check",
-    "coverage": "pnpm php:stop ; pnpm php:start && nyc --reporter=text mocha tests/**/*.spec.js; pnpm php:stop"
+    "coverage": "pnpm php:stop ; pnpm php:start && nyc --reporter=text mocha tests/**/*.spec.mjs; pnpm php:stop"
   },
   "repository": {
     "type": "git",

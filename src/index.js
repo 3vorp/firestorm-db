@@ -116,11 +116,11 @@ class Firestorm {
 	 */
 	async isCompatibleAddress() {
 		const serverVersion = await this.serverVersion;
-		const splitServer = serverVersion.split(".");
-		const splitClient = this.clientVersion.split(".");
+		const [serverMajor, serverMinor] = serverVersion.split(".");
+		const [clientMajor, clientMinor] = this.clientVersion.split(".");
 
-		// patch version keeps server compatibility
-		return splitServer[0] === splitClient[0] && splitServer[1] === splitClient[1];
+		// minor version keeps server compatibility (only added features), patch version is irrelevant
+		return serverMajor === clientMajor && serverMinor >= clientMinor;
 	}
 }
 

@@ -2,10 +2,6 @@
 require_once './utils.php';
 require_once './classes/JSONDatabase.php';
 
-// Server-side version of Firestorm, used for client validation
-// Update this version whenever you update Firestorm!
-$FIRESTORM_VERSION = '2.0.0';
-
 $log_path = 'firestorm.log';
 
 /**

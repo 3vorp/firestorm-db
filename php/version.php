@@ -1,4 +1,7 @@
 <?php
+// Server-side version of Firestorm, used for client validation
+// Make sure this matches your installed server version!
+$FIRESTORM_VERSION = '2.0.0';
 
 // require a token for checking the version to prevent being able to search for vulnerable versions
 require_once './utils.php';
@@ -32,14 +35,5 @@ if (!$db_tokens)
 // verifying token
 if (!in_array($token, $db_tokens))
 	http_error(403, 'Invalid token');
-
-if (file_exists('./config.php') == false)
-	http_error(501, 'Developer didn\'t implement a config.php file');
-
-// import db config
-require_once './config.php';
-
-if (!isset($FIRESTORM_VERSION))
-	http_error(501, 'Server-side Firestorm version is older than the serverVersion field.');
 
 http_response($FIRESTORM_VERSION);

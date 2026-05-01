@@ -404,7 +404,7 @@ await firestorm.serverVersion;
 await firestorm.isCompatibleAddress();
 ```
 
-Whenever updating Firestorm on your server, be sure to update the `$FIRESTORM_VERSION` global in `config.php`.
+Whenever updating Firestorm on your server, be sure to update the `$FIRESTORM_VERSION` global in `version.php`.
 
 ## Memory management
 

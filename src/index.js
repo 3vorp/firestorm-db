@@ -3,7 +3,7 @@ const axios = require("axios").default;
 const Collection = require("./collection.js");
 const FirestormFiles = require("./files.js");
 
-const { __extract_data } = require("./utils.js");
+const { extractRequest } = require("./utils.js");
 
 /**
  * @typedef FirestormCreationOption
@@ -101,7 +101,7 @@ class Firestorm {
 		if (!this.address)
 			throw new Error(`Address for Firestorm instance "${this.instance.name}" was not configured`);
 
-		return __extract_data(
+		return extractRequest(
 			axios.get(`${this.address}version.php`, {
 				data: {
 					token: this.token,

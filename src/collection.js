@@ -1,5 +1,5 @@
 const axios = require("axios").default;
-const { __extract_data } = require("./utils.js");
+const { applyAddMethods, extractRequest, getData, createPostData } = require("./utils.js");
 
 const ID_FIELD_NAME = "id";
 
@@ -39,12 +39,6 @@ const ID_FIELD_NAME = "id";
 /**
  * @typedef {Object} WriteConfirmation
  * @property {string} message - Write status
- */
-
-/**
- * Axios Promise typedef to avoid documentation generation problems
- * @ignore
- * @typedef {require("axios").AxiosPromise} AxiosPromise
  */
 
 /**
@@ -100,30 +94,6 @@ class Collection {
 		this.ID_FIELD = ID_FIELD_NAME;
 	}
 
-	/**
-	 * Add user methods to returned data
-	 * @private
-	 * @ignore
-	 * @param {any} el - Value to add methods to
-	 * @param {boolean} [nested] - Nest the methods inside an object
-	 * @returns {any}
-	 */
-	__add_methods(el, nested = true) {
-		// can't add properties on falsy values
-		if (!el) return el;
-		if (Array.isArray(el)) return el.map((el) => this.addMethods(el, this));
-		// nested objects
-		if (nested && typeof el === "object") {
-			Object.keys(el).forEach((k) => {
-				el[k] = this.addMethods(el[k], this);
-			});
-			return el;
-		}
-
-		// add directly to single object
-		return this.addMethods(el, this);
-	}
-
 	/** @ignore */
 	get __read_address() {
 		if (!this.instance.address)
@@ -139,78 +109,13 @@ class Collection {
 	}
 
 	/**
-	 * Send GET request with provided data and return extracted response
-	 * @private
-	 * @ignore
-	 * @param {string} command - The read command name
-	 * @param {Object} [data] - Body data
-	 * @param {boolean} [objectLike] - Reject if an object or array isn't being returned
-	 * @returns {Promise<any>} Extracted response
-	 */
-	async __get_request(command, data = {}, objectLike = true) {
-		const obj = {
-			collection: this.collectionName,
-			command: command,
-			...data,
-		};
-		const request = axios.get(this.__read_address, { data: obj });
-		const res = await __extract_data(request);
-		// reject php error strings if enforcing return type
-		if (objectLike && typeof res !== "object") throw res;
-		return res;
-	}
-
-	/**
-	 * Generate POST data with provided data
-	 * @private
-	 * @ignore
-	 * @param {string} command - The write command name
-	 * @param {Object} [value] - The value for the command
-	 * @param {boolean} [multiple] - Used to delete multiple
-	 * @returns {Object} Write data object
-	 */
-	__write_data(command, value = undefined, multiple = false) {
-		const obj = {
-			collection: this.collectionName,
-			token: this.instance.token,
-			command,
-		};
-
-		// clone/serialize data if possible (prevents mutating data)
-		if (value) value = JSON.parse(JSON.stringify(value));
-
-		if (multiple && Array.isArray(value)) {
-			value.forEach((v) => {
-				if (typeof v === "object" && !Array.isArray(v) && v != null) delete v[this.ID_FIELD];
-			});
-		} else if (
-			multiple === false &&
-			value !== null &&
-			value !== undefined &&
-			typeof value !== "number" &&
-			typeof value !== "string" &&
-			!Array.isArray(value)
-		) {
-			if (typeof value === "object") value = { ...value };
-			delete value[this.ID_FIELD];
-		}
-
-		if (value) {
-			if (multiple) obj.values = value;
-			else obj.value = value;
-		}
-
-		return obj;
-	}
-
-	/**
 	 * Get the SHA-1 hash of the JSON
 	 * - Can be used to compare file content without downloading the file
 	 * @returns {Promise<string>} The SHA-1 hash of the file
 	 */
 	sha1() {
 		// string value is correct so we don't need validation
-		return this.__get_request("sha1", {}, false);
+		return getData(this, "sha1", {}, false);
 	}
 
 	/**
@@ -219,12 +124,12 @@ class Collection {
 	 * @returns {Promise<T>} The found element
 	 */
 	async get(key) {
-		const res = await this.__get_request("get", {
+		const res = await getData(this, "get", {
 			id: key,
 		});
 		// String is more portable than .toString()
 		res[this.ID_FIELD] = String(key);
-		return this.__add_methods(res, false);
+		return applyAddMethods(this, res, false);
 	}
 
 	/**
@@ -235,14 +140,14 @@ class Collection {
 	async searchKeys(keys) {
 		if (!Array.isArray(keys)) throw new TypeError("Incorrect keys");
 
-		const res = await this.__get_request("searchKeys", {
+		const res = await getData(this, "searchKeys", {
 			search: keys,
 		});
 		const arr = Object.entries(res).map(([id, value]) => {
 			value[this.ID_FIELD] = id;
 			return value;
 		});
-		return this.__add_methods(arr);
+		return applyAddMethods(this, arr);
 	}
 
 	/**
@@ -312,12 +217,12 @@ class Collection {
 			}
 		}
 
-		const res = await this.__get_request("search", params);
+		const res = await getData(this, "search", params);
 		const arr = Object.entries(res).map(([id, value]) => {
 			value[this.ID_FIELD] = id;
 			return value;
 		});
-		return this.__add_methods(arr);
+		return applyAddMethods(this, arr);
 	}
 
 	/**
@@ -326,13 +231,13 @@ class Collection {
 	 * @returns {Promise<Record<string, T>>} The entire collection
 	 */
 	async readRaw(original = false) {
-		const data = await this.__get_request("readRaw");
-		if (original) return this.__add_methods(data);
+		const data = await getData(this, "readRaw");
+		if (original) return applyAddMethods(this, data);
 		// preserve as object
 		Object.keys(data).forEach((key) => {
 			data[key][this.ID_FIELD] = key;
 		});
-		return this.__add_methods(data);
+		return applyAddMethods(this, data);
 	}
 
 	/**
@@ -343,13 +248,13 @@ class Collection {
 	 */
 	async select(option) {
 		if (!option) option = {};
-		const data = await this.__get_request("select", {
+		const data = await getData(this, "select", {
 			select: option,
 		});
 		Object.keys(data).forEach((key) => {
 			data[key][this.ID_FIELD] = key;
 		});
-		return this.__add_methods(data);
+		return applyAddMethods(this, data);
 	}
 
 	/**
@@ -363,7 +268,7 @@ class Collection {
 		if (option.flatten !== undefined && typeof option.flatten !== "boolean")
 			throw new TypeError("Flatten must be a boolean");
 
-		const data = await this.__get_request("values", {
+		const data = await getData(this, "values", {
 			values: option,
 		});
 		// no ID_FIELD or method injection since no ids are returned
@@ -401,13 +306,13 @@ class Collection {
 			params.offset = offset;
 		}
 
-		const data = await this.__get_request("random", {
+		const data = await getData(this, "random", {
 			random: params,
 		});
 		Object.keys(data).forEach((key) => {
 			data[key][this.ID_FIELD] = key;
 		});
-		return this.__add_methods(data);
+		return applyAddMethods(this, data);
 	}
 
 	/**
@@ -419,7 +324,9 @@ class Collection {
 	async writeRaw(value) {
 		if (value === undefined || value === null)
 			throw new TypeError("writeRaw value cannot be undefined or null");
-		return __extract_data(axios.post(this.__write_address, this.__write_data("writeRaw", value)));
+		return extractRequest(
+			axios.post(this.__write_address, createPostData(this, "writeRaw", value)),
+		);
 	}
 
 	/**
@@ -429,8 +336,8 @@ class Collection {
 	 * @returns {Promise<string>} The generated key of the added element
 	 */
 	async add(value) {
-		const res = await __extract_data(
-			axios.post(this.__write_address, this.__write_data("add", value)),
+		const res = await extractRequest(
+			axios.post(this.__write_address, createPostData(this, "add", value)),
 		);
 		if (typeof res !== "object" || !("id" in res) || typeof res.id !== "string") throw res;
 		return res.id;
@@ -443,8 +350,8 @@ class Collection {
 	 * @returns {Promise<string[]>} The generated keys of the added elements
 	 */
 	async addBulk(values) {
-		const res = await __extract_data(
-			axios.post(this.__write_address, this.__write_data("addBulk", values, true)),
+		const res = await extractRequest(
+			axios.post(this.__write_address, createPostData(this, "addBulk", values, true)),
 		);
 		return res.ids;
 	}
@@ -455,7 +362,7 @@ class Collection {
 	 * @returns {Promise<WriteConfirmation>} Write confirmation
 	 */
 	remove(key) {
-		return __extract_data(axios.post(this.__write_address, this.__write_data("remove", key)));
+		return extractRequest(axios.post(this.__write_address, createPostData(this, "remove", key)));
 	}
 
 	/**
@@ -464,7 +371,9 @@ class Collection {
 	 * @returns {Promise<WriteConfirmation>} Write confirmation
 	 */
 	removeBulk(keys) {
-		return __extract_data(axios.post(this.__write_address, this.__write_data("removeBulk", keys)));
+		return extractRequest(
+			axios.post(this.__write_address, createPostData(this, "removeBulk", keys)),
+		);
 	}
 
 	/**
@@ -474,9 +383,9 @@ class Collection {
 	 * @returns {Promise<WriteConfirmation>} Write confirmation
 	 */
 	set(key, value) {
-		const data = this.__write_data("set", value);
+		const data = createPostData(this, "set", value);
 		data["key"] = key;
-		return __extract_data(axios.post(this.__write_address, data));
+		return extractRequest(axios.post(this.__write_address, data));
 	}
 
 	/**
@@ -486,9 +395,9 @@ class Collection {
 	 * @returns {Promise<WriteConfirmation>} Write confirmation
 	 */
 	setBulk(keys, values) {
-		const data = this.__write_data("setBulk", values, true);
+		const data = createPostData(this, "setBulk", values, true);
 		data["keys"] = keys;
-		return __extract_data(axios.post(this.__write_address, data));
+		return extractRequest(axios.post(this.__write_address, data));
 	}
 
 	/**
@@ -497,8 +406,8 @@ class Collection {
 	 * @returns {Promise<WriteConfirmation>} Edit confirmation
 	 */
 	editField(option) {
-		const data = this.__write_data("editField", option, null);
-		return __extract_data(axios.post(this.__write_address, data));
+		const data = createPostData(this, "editField", option, null);
+		return extractRequest(axios.post(this.__write_address, data));
 	}
 
 	/**
@@ -507,8 +416,8 @@ class Collection {
 	 * @returns {Promise<WriteConfirmation>} Edit confirmation
 	 */
 	editFieldBulk(options) {
-		const data = this.__write_data("editFieldBulk", options, undefined);
-		return __extract_data(axios.post(this.__write_address, data));
+		const data = createPostData(this, "editFieldBulk", options, undefined);
+		return extractRequest(axios.post(this.__write_address, data));
 	}
 }
 

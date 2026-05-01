@@ -1,8 +1,8 @@
 const axios = require("axios").default;
-const { __extract_data } = require("./utils.js");
+const { extractRequest } = require("./utils.js");
 
 /**
- * Axios Promise typedef to avoid documentation generation problems
+ * Node.js FormData typedef to avoid documentation generation problems
  * @ignore
  * @typedef {require("form-data").FormData} NodeFormData
  */
@@ -37,11 +37,9 @@ class FirestormFiles {
 	 * @returns {Promise<T>} File contents
 	 */
 	get(path) {
-		return __extract_data(
+		return extractRequest(
 			axios.get(this.__file_address, {
-				params: {
-					path,
-				},
+				params: { path },
 			}),
 		);
 	}
@@ -53,11 +51,9 @@ class FirestormFiles {
 	 */
 	upload(form) {
 		form.append("token", this.instance.token);
-		return __extract_data(
+		return extractRequest(
 			axios.post(this.__file_address, form, {
-				headers: {
-					...form.getHeaders(),
-				},
+				headers: { ...form.getHeaders() },
 			}),
 		);
 	}
@@ -68,7 +64,7 @@ class FirestormFiles {
 	 * @returns {Promise<WriteConfirmation>} Write confirmation
 	 */
 	delete(path) {
-		return __extract_data(
+		return extractRequest(
 			axios.delete(this.__file_address, {
 				data: {
 					path,

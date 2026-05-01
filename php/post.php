@@ -11,7 +11,7 @@ if ($method === 'GET') {
     http_error(400, "Incorrect request type, expected POST, not $method");
 }
 
-$inputJSON = json_decode(file_get_contents('php://input'), true);
+$inputJSON = json_decode(file_get_contents('php://input') ?: "", true);
 
 if (!$inputJSON)
     http_error(400, 'No JSON body provided');

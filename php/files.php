@@ -132,7 +132,7 @@ if ($method === 'POST') {
         http_error(403, 'Path not authorized');
 
     // no php script allowed
-    if (substr_compare($absolutePath, ".php", -strlen(".php"), null, true) === 0)
+    if (str_ends_with(strtolower($absolutePath), ".php"))
         http_error(403, 'Cannot read PHP scripts');
 
     if (!file_exists($absolutePath))
@@ -181,15 +181,14 @@ if ($method === 'POST') {
     if (!$db_tokens)
         http_error(501, 'Developer is dumb and forgot to create tokens');
 
-    $data = json_decode(file_get_contents('php://input'), true);
+    $data = json_decode(file_get_contents('php://input') ?: "", true);
     if ($data === false)
         http_error(400, 'Could not parse input data');
 
-    try {
-        $token = $data['token'];
-    } catch (Exception $e) {
+    if (!array_key_exists('token', $data))
         http_error(400, 'Failed parsing input data');
-    }
+
+    $token = $data['token'];
 
     // verifying token
     if ($token === false)
@@ -198,7 +197,7 @@ if ($method === 'POST') {
         http_error(403, 'Invalid token');
 
     $path = trim($data['path']);
-    if ($path === false)
+    if (strlen($path) === 0)
         http_error(400, 'No path provided');
 
     // check path lower than me

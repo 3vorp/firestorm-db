@@ -1,6 +1,12 @@
 const axios = require("axios").default;
 const { __extract_data } = require("./utils.js");
 
+/**
+ * Axios Promise typedef to avoid documentation generation problems
+ * @ignore
+ * @typedef {require("form-data").FormData} NodeFormData
+ */
+
 /** Firestorm file manager */
 class FirestormFiles {
 	/**
@@ -42,7 +48,7 @@ class FirestormFiles {
 
 	/**
 	 * Upload a file
-	 * @param {FormData} form - Form data with path, filename, and file
+	 * @param {FormData | NodeFormData} form - Form data with path, filename, and file
 	 * @returns {Promise<WriteConfirmation>} Write confirmation
 	 */
 	upload(form) {

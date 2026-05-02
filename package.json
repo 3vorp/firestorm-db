@@ -14,7 +14,7 @@
     "docker:tests": "bash docker/docker_image_tests.bash",
     "docker:start": "bash docker/docker_image_start.bash",
     "doc:gen": "jsdoc src/* -c jsdoc.json -R README.md -t ./node_modules/docdash -d out",
-    "doc:watch": "nodemon -x pnpm doc:gen --watch src/index.js --watch jsdoc.json --watch README.md",
+    "doc:watch": "nodemon -x pnpm doc:gen --watch src/* --watch jsdoc.json --watch README.md",
     "types:gen": "npx tsc",
     "lint:write": "prettier \"{,!(node_modules)/**/}*.{cjs,mjs,js,ts}\" --config .prettierrc --write",
     "lint:check": "prettier \"{,!(node_modules)/**/}*.{cjs,mjs,js,ts}\" --config .prettierrc --check",
@@ -38,10 +38,7 @@
     "url": "https://github.com/TheRolfFR/firestorm/issues"
   },
   "homepage": "https://therolffr.github.io/firestorm-db/",
-  "files": [
-    "src/index.js",
-    "typings/index.d.ts"
-  ],
+  "files": ["src/", "typings/"],
   "engines": {
     "node": ">=20.0.0"
   },

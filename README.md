@@ -19,7 +19,7 @@
 
 # JavaScript Client
 
-The JavaScript [index.js](./src/index.js) file is a fairly simple wrapper around the backend PHP endpoints, using [Axios](https://www.npmjs.com/package/axios) to handle requests. Any server errors will hence be returned to the client as Axios errors.
+The JavaScript client is a fairly simple wrapper around the backend PHP endpoints, using [Axios](https://www.npmjs.com/package/axios) to handle requests. Any server errors will hence be returned to the client as Axios error objects.
 
 ## JavaScript setup
 
@@ -42,7 +42,7 @@ firestorm.address // returns "https://example.com/path/to/firestorm/root"
 firestorm.name = "dev"; // sets the debugging name to dev
 ```
 
-Now you can use Firestorm to its full potential.
+After setting your server address and token fields, you can begin using Firestorm to its full potential.
 
 ## Create your first collection
 
@@ -84,33 +84,33 @@ johnDoe.hello(); // "John Doe says hello!"
 
 ## Write operations
 
-| Name                    | Parameters                                       | Description                                                                               |
-| ----------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------- |
-| writeRaw(value)         | value: `Object`                                  | Set the entire content of the collection. **⚠️ Very dangerous! ⚠️**                         |
-| add(value)              | value: `Object`                                  | Append a value to the collection. Only works if `autoKey` is enabled server-side.         |
-| addBulk(values)         | values: `Object[]`                               | Append multiple values to the collection. Only works if `autoKey` is enabled server-side. |
-| remove(key)             | key: `string \| number`                          | Remove an element from the collection by its key.                                         |
-| removeBulk(keys)        | keys: `(string \| number)[]`                     | Remove multiple elements from the collection by their keys.                               |
-| set(key, value)         | key: `string \| number`, value: `Object`         | Set a value in the collection by its key.                                                 |
-| setBulk(keys, values)   | keys: `(string \| number)[]`, values: `Object[]` | Set multiple values in the collection by their keys.                                      |
-| editField(obj)          | option: `EditFieldOption`                        | Edit an element's field in the collection.                                                |
-| editFieldBulk(objArray) | options: `EditFieldOption[]`                     | Edit multiple elements' fields in the collection.                                         |
+| Name                   | Parameters                                       | Description                                                                               |
+| ---------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| writeRaw(value)        | value: `Object`                                  | Set the entire content of the collection. **⚠️ Very dangerous! ⚠️**                         |
+| add(value)             | value: `Object`                                  | Append a value to the collection. Only works if `autoKey` is enabled server-side.         |
+| addBulk(values)        | values: `Object[]`                               | Append multiple values to the collection. Only works if `autoKey` is enabled server-side. |
+| remove(key)            | key: `string \| number`                          | Remove an element from the collection by its key.                                         |
+| removeBulk(keys)       | keys: `(string \| number)[]`                     | Remove multiple elements from the collection by their keys.                               |
+| set(key, value)        | key: `string \| number`, value: `Object`         | Set a value in the collection by its key.                                                 |
+| setBulk(keys, values)  | keys: `(string \| number)[]`, values: `Object[]` | Set multiple values in the collection by their keys.                                      |
+| editField(option)      | option: `EditFieldOption`                        | Edit an element's field in the collection.                                                |
+| editFieldBulk(options) | options: `EditFieldOption[]`                     | Edit multiple elements' fields in the collection.                                         |
 
 ## Search options
 
-There are more options available than the Firestore `where` command, allowing you to get better and faster search results.
+There are more options available than the Firestore `where` command, allowing you to get better search results more quickly.
 
 The search method can take one or more options to filter entries in a collection. A search option takes a `field` with a `criteria` and compares it to a `value`. You can also use the boolean `ignoreCase` option for string values and the `limit` option to restrict the number of results returned. Available criteria depends on the field type.
 
 | Criteria                | Types allowed                 | Description                                                     |
 | ----------------------- | ----------------------------- | --------------------------------------------------------------- |
-| `'!='`                  | `boolean`, `number`, `string` | Entry field's value is different from yours                     |
-| `'=='`                  | `boolean`, `number`, `string` | Entry field's value is equal to yours                           |
-| `'>='`                  | `number`, `string`            | Entry field's value is greater or equal than yours              |
-| `'<='`                  | `number`, `string`            | Entry field's value is equal to than yours                      |
-| `'>'`                   | `number`, `string`            | Entry field's value is greater than yours                       |
-| `'<'`                   | `number`, `string`            | Entry field's value is lower than yours                         |
-| `'in'`                  | `number`, `string`            | Entry field's value is in the array of values you gave          |
+| `'!='`                  | `boolean \| number \| string` | Entry field's value is different from yours                     |
+| `'=='`                  | `boolean \| number \| string` | Entry field's value is equal to yours                           |
+| `'>='`                  | `number \| string`            | Entry field's value is greater or equal than yours              |
+| `'<='`                  | `number \| string`            | Entry field's value is equal to than yours                      |
+| `'>'`                   | `number \| string`            | Entry field's value is greater than yours                       |
+| `'<'`                   | `number \| string`            | Entry field's value is lower than yours                         |
+| `'in'`                  | `number \| string`            | Entry field's value is in the array of values you gave          |
 | `'includes'`            | `string`                      | Entry field's value includes your substring                     |
 | `'startsWith'`          | `string`                      | Entry field's value starts with your substring                  |
 | `'endsWith'`            | `string`                      | Entry field's value ends with your substring                    |

@@ -39,15 +39,11 @@ export interface Collection<T> {
 
 	/**
 	 * Search through the collection
-	 * @param options - Array of search options
-	 * @param random - Random result seed, disabled by default, but can activated with true or a given seed
-	 * @param limit - Limit the number of results returned (only applies if random is false)
+	 * @param options - Array of search filters
+	 * @param option - Additional filter options
 	 * @returns The found elements
 	 */
-	search(
-		options: SearchOption<RemoveMethods<T>>[],
-		random?: boolean | number | SearchResultOptions,
-	): Promise<T[]>;
+	search(filter: SearchFilter<RemoveMethods<T>>[], option?: SearchOption): Promise<T[]>;
 
 	/**
 	 * Read the entire collection
@@ -289,7 +285,7 @@ export type EditFieldOption<T> = {
 		);
 }[keyof T];
 
-export type SearchOption<T> = {
+export type SearchFilter<T> = {
 	[K in keyof T]: {
 		/** The field to be searched for */
 		field: Path<T>;
@@ -302,7 +298,7 @@ export type SearchOption<T> = {
 	};
 }[keyof T];
 
-export type SearchResultOptions = {
+export type SearchOption = {
 	/** Random result seed, disabled by default, but can activated with true or a given seed */
 	random?: boolean | number;
 	/** Limit the number of results returned (only applies if random is false) */

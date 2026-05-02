@@ -4,7 +4,7 @@ const { applyAddMethods, extractRequest, getData, createPostData } = require("./
 const ID_FIELD_NAME = "id";
 
 /**
- * @typedef {Object} SearchOption
+ * @typedef {Object} SearchFilter
  * @property {string} field - The field to be searched for
  * @property {"!=" | "==" | ">=" | "<=" | "<" | ">" | "in" | "includes" | "startsWith" | "endsWith" | "array-contains" | "array-contains-none" | "array-contains-any" | "array-contains-all" | "array-length-eq" | "array-length-df" | "array-length-gt" | "array-length-le" | "array-length-lt" | "array-length-ge"} criteria - Search criteria to filter results
  * @property {string | number | boolean | Array} value - The value to be searched for
@@ -12,7 +12,7 @@ const ID_FIELD_NAME = "id";
  */
 
 /**
- * @typedef {Object} SearchResultOptions
+ * @typedef {Object} SearchOption
  * @property {(boolean | number)?} [random] - Random result seed, disabled by default, but can activated with true or a given seed
  * @property {number?} [limit] - Maximum number of results to return
  */
@@ -152,21 +152,16 @@ class Collection {
 
 	/**
 	 * Search through the collection
-	 * @param {SearchOption[]} options - Array of search options
-	 * @param {(boolean | number | SearchResultOptions)?} [resultOptions] - Search result options
+	 * @param {SearchFilter[]} filter - Array of search options
+	 * @param {SearchOption} [option] - Search result options
 	 * @returns {Promise<T[]>} The found elements
 	 */
-	async search(options, resultOptions = undefined) {
-		if (!Array.isArray(options)) throw new TypeError("searchOptions shall be an array");
-		if (
-			resultOptions !== undefined &&
-			typeof resultOptions !== "number" &&
-			typeof resultOptions !== "boolean" &&
-			typeof resultOptions !== "object"
-		)
-			throw new TypeError("Incorrect search result options");
+	async search(filter, option) {
+		if (!Array.isArray(filter)) throw new TypeError("Search filters must be in an array");
+		if (option !== undefined && typeof option !== "object")
+			throw new TypeError("Search options must be an object");
 
-		const { random = false, limit = undefined } = resultOptions || {};
+		const { random = false, limit = undefined } = option || {};
 
 		if (
 			limit !== undefined &&
@@ -186,12 +181,12 @@ class Collection {
 				`${JSON.stringify(random)} search option random must be a boolean or an integer`,
 			);
 
-		options.forEach((option) => {
+		filter.forEach((option) => {
 			if (option.field === undefined || option.criteria === undefined || option.value === undefined)
-				throw new TypeError("Missing fields in searchOptions array");
+				throw new TypeError("Missing fields in filter array");
 
 			if (typeof option.field !== "string")
-				throw new TypeError(`${JSON.stringify(option)} search option field is not a string`);
+				throw new TypeError(`${JSON.stringify(option)} filter field is not a string`);
 
 			if (option.criteria == "in" && !Array.isArray(option.value))
 				throw new TypeError("in takes an array of values");
@@ -200,12 +195,10 @@ class Collection {
 		});
 
 		const params = {
-			search: options,
+			search: filter,
 		};
 
-		if (limit !== undefined) {
-			params.limit = limit;
-		}
+		if (limit !== undefined) params.limit = limit;
 
 		if (random !== undefined && random !== false) {
 			params.random = parseInt(random);

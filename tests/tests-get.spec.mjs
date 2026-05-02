@@ -140,7 +140,7 @@ describe("GET operations", () => {
 
 	describe("search(searchOptions)", () => {
 		/**
-		 * @typedef {import("../src/collection.js").SearchOption["criteria"]} Criteria
+		 * @typedef {import("../src/collection.js").SearchFilter["criteria"]} Criteria
 		 * @type {Readonly<[Criteria, string, any, string[], boolean?]>[]}
 		 * [criteria, field, value, idsFound, ignoreCase]
 		 */
@@ -294,7 +294,7 @@ describe("GET operations", () => {
 			});
 		});
 
-		[true, { random: true }].forEach((trueval) => {
+		[{ random: true }].forEach((trueval) => {
 			it(`${JSON.stringify(trueval)} seed succeeds`, (done) => {
 				base
 					.search(
@@ -327,7 +327,7 @@ describe("GET operations", () => {
 								value: "",
 							},
 						],
-						seed,
+						{ random: seed },
 					);
 				}),
 			)
@@ -354,9 +354,7 @@ describe("GET operations", () => {
 							value: "Joy",
 						},
 					],
-					{
-						limit: 1,
-					},
+					{ limit: 1 },
 				)
 				.then((res) => {
 					expect(res).to.be.an("array", "Search result must be an array");

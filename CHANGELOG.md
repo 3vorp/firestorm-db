@@ -9,9 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `createFirestorm` function, which creates a new `Firestorm` instance (replaces the previous `firestorm` global).
 - `Firestorm.clientVersion` field.
 - `Firestorm.serverVersion` getter (returns a `Promise<string>`).
 - `Firestorm.name` instance field, for debugging purposes.
+- `Firestorm.isCompatibleAddress()` method, for checking if the client and server versions are compatible.
 
 ### Changed
 

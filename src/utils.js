@@ -49,7 +49,7 @@ async function extractRequest(request) {
 async function getData(collection, command, data = {}, objectLike = true) {
 	const obj = {
 		collection: collection.collectionName,
-		command: command,
+		command,
 		...data,
 	};
 	const request = axios.get(collection.__read_address, { data: obj });

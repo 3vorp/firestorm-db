@@ -412,7 +412,7 @@ class JSONDatabase {
         $fileObj = $this->read(true);
         foreach ($objArray as &$editObj) {
             // edit by reference, faster than passing values back and forth
-            editField($fileObj, $editObj);
+            editField($fileObj->content, $editObj);
         }
         $this->write($fileObj);
     }
